@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Resonant Echoes — Chapter I</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:     #c9973a;
+      --gold-dim: #8a6422;
+    }
+
+    body {
+      --bg:       #f5ecd7;
+      --bg-2:     #ede0c4;
+      --text:     #2a1f0a;
+      --text-sub: #5a3e1b;
+      --rule:     #8a6422;
+      min-height: 100vh;
+      background: var(--bg);
+      font-family: 'EB Garamond', Georgia, serif;
+      color: var(--text);
+      transition: background 0.4s, color 0.4s;
+      overflow: hidden;
+    }
+
+    body.dark {
+      --bg:       #1a1208;
+      --bg-2:     #241a0c;
+      --text:     #f5ecd7;
+      --text-sub: #c9973a;
+      --rule:     #8a6422;
+    }
+
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.6s;
+    }
+    body.dark #stars { opacity: 1; }
+
+    .reader {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .chapter-header {
+      padding: 2rem 0 1.2rem;
+      text-align: center;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(138,100,34,0.2);
+    }
+
+    .chapter-label {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.58rem, 1.5vw, 0.7rem);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+    }
+
+    .chapter-title {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      color: var(--gold);
+      margin-top: 0.3rem;
+      line-height: 1.3;
+    }
+
+    .chapter-sub {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.55rem, 1.3vw, 0.65rem);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      margin-top: 0.4rem;
+      opacity: 0.7;
+    }
+
+    .text-area {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      padding: 1.5rem 0;
+    }
+
+    #para-pool { display: none; }
+
+    #page-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      animation: pageFade 0.4s ease;
+    }
+
+    @keyframes pageFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #page-content p {
+      font-size: var(--font-size, 1.15rem);
+      line-height: 1.85;
+      color: var(--text);
+      margin-bottom: 1em;
+    }
+
+    #page-content p:last-child { margin-bottom: 0; }
+
+    /* Entry heading — for Watcher-style sub-headers */
+    #page-content p.entry-head {
+      font-family: 'Cinzel', serif;
+      font-size: calc(var(--font-size, 1.15rem) * 0.72);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      font-style: normal;
+      margin-bottom: 1.4em;
+      line-height: 1.6;
+    }
+
+    /* Marginalia — gold left border for Watcher asides */
+    #page-content p.marginalia {
+      border-left: 2px solid var(--gold-dim);
+      padding-left: 1rem;
+      font-style: italic;
+      color: var(--text-sub);
+      margin-top: 0.5em;
+    }
+
+    /* Scene break — centered ornament */
+    #page-content p.scene-break {
+      text-align: center;
+      color: var(--gold-dim);
+      font-style: normal;
+      letter-spacing: 0.5em;
+      margin: 0.5em 0;
+    }
+
+    .nav-bar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 0 1.2rem;
+      border-top: 1px solid rgba(138,100,34,0.2);
+      gap: 1rem;
+    }
+
+    .nav-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover:not(:disabled) { color: var(--gold); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.25; cursor: default; }
+
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      flex: 1;
+    }
+
+    .page-indicator {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      opacity: 0.7;
+    }
+
+    .font-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .font-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      cursor: pointer;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      transition: color 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .font-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .theme-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      padding: 0.4rem 0.7rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .theme-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .toc-link {
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      text-decoration: none;
+      opacity: 0.6;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    .toc-link:hover { opacity: 1; color: var(--gold); }
+
+    .tap-prev, .tap-next {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      z-index: 50;
+      cursor: pointer;
+      opacity: 0;
+    }
+    .tap-prev { left: 0; }
+    .tap-next { right: 0; }
+  </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<!-- ============================================================
+     CONTENT GOES HERE
+     
+     INSTRUCTIONS:
+     1. Copy the text from inside <body>...</body> in your 
+        Scrivener HTML export
+     2. Paste it between the #para-pool div tags below
+     3. Clean out any junk Scrivener tags you don't want
+     4. Use these special classes where needed:
+        - class="entry-head"   → Watcher-style sub-headers
+        - class="marginalia"   → Gold left-border asides
+        - class="scene-break"  → Put ✦ ✦ ✦ for scene breaks
+     
+     FILL IN:
+     - TBD CHAPTER LABEL  (e.g. "Chapter I" or "Prologue")
+     - TBD CHAPTER TITLE  (e.g. "When the Monster Stares Back")
+     - TBD PAGE TITLE     (in the <title> tag at the top)
+     - PREV / NEXT links  (update href on the nav buttons)
+============================================================ -->
+
+<div id="para-pool">
+
+  <!-- PASTE YOUR SCRIVENER BODY CONTENT HERE -->
+  <p>Your chapter text goes here.</p>
+
+</div>
+
+<!-- Mobile tap zones -->
+<div class="tap-prev" id="tap-prev"></div>
+<div class="tap-next" id="tap-next"></div>
+
+<div class="reader">
+
+  <div class="chapter-header">
+    <p class="chapter-label">Chapter I</p>       <!-- e.g. Chapter I -->
+    <p class="chapter-title">WHen the Monster Stares Back</p>       <!-- e.g. When the Monster Stares Back -->
+    <p class="chapter-sub">Resonant Echoes</p>
+  </div>
+
+  <div class="text-area" id="text-area">
+    <div id="page-content"></div>
+  </div>
+
+  <nav class="nav-bar">
+    <!-- Update href to point to previous chapter or toc -->
+    <button class="nav-btn" id="prev-btn" onclick="prevPage()" disabled>&#8592; Prev</button>
+
+    <div class="nav-center">
+      <span class="page-indicator" id="page-indicator">Page 1</span>
+      <div class="font-controls">
+        <button class="font-btn" onclick="adjustFont(-1)" title="Smaller">A&#8331;</button>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">&#9790; Dark</button>
+        <button class="font-btn" onclick="adjustFont(1)"  title="Larger">A&#8314;</button>
+      </div>
+      <a class="toc-link" href="toc.html">&#8617; Contents</a>
+    </div>
+
+    <!-- Update href to point to next chapter -->
+    <button class="nav-btn" id="next-btn" onclick="nextPage()">Next &#8594;</button>
+  </nav>
+
+</div>
+
+<script>
+  // ── Token guard ──
+  (function() {
+    const token = sessionStorage.getItem('re_token');
+    if (!token) {
+      window.location.href = 'https://jpcauthor.github.io/resonant-echoes/login.html';
+    }
+  })();
+
+  // ── Theme ──
+  const body     = document.body;
+  const themeBtn = document.getElementById('theme-btn');
+  const saved    = localStorage.getItem('re_theme') || 'dark';
+
+  if (saved === 'dark') { body.classList.add('dark'); themeBtn.textContent = '☀ Light'; }
+  else { themeBtn.textContent = '☽ Dark'; }
+
+  function toggleTheme() {
+    const isDark = body.classList.toggle('dark');
+    themeBtn.textContent = isDark ? '☀ Light' : '☽ Dark';
+    localStorage.setItem('re_theme', isDark ? 'dark' : 'light');
+    buildPages();
+  }
+
+  // ── Font size ──
+  let fontSize = parseFloat(localStorage.getItem('re_fontsize') || '1.15');
+  document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+
+  function adjustFont(dir) {
+    fontSize = Math.min(1.6, Math.max(0.9, fontSize + dir * 0.1));
+    localStorage.setItem('re_fontsize', fontSize);
+    document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+    buildPages();
+  }
+
+  // ── Pagination engine ──
+  let pages       = [];
+  let currentPage = 0;
+
+  function buildPages() {
+    const pool    = document.getElementById('para-pool');
+    const area    = document.getElementById('text-area');
+    const content = document.getElementById('page-content');
+    const paras   = Array.from(pool.children);
+    const areaH   = area.clientHeight;
+
+    pages = [];
+    let currentGroup = [];
+    let testDiv = document.createElement('div');
+    testDiv.style.cssText = `
+      position: absolute;
+      visibility: hidden;
+      width: ${content.clientWidth}px;
+      font-size: ${fontSize}rem;
+      line-height: 1.85;
+      font-family: 'EB Garamond', Georgia, serif;
+      padding: 0;
+    `;
+    document.body.appendChild(testDiv);
+
+    for (const para of paras) {
+      currentGroup.push(para);
+      testDiv.innerHTML = currentGroup.map(p => p.outerHTML).join('');
+      if (testDiv.scrollHeight > areaH - 20 && currentGroup.length > 1) {
+        currentGroup.pop();
+        pages.push([...currentGroup]);
+        currentGroup = [para];
+      }
+    }
+    if (currentGroup.length) pages.push([...currentGroup]);
+    document.body.removeChild(testDiv);
+
+    if (currentPage >= pages.length) currentPage = pages.length - 1;
+    renderPage();
+  }
+
+  function renderPage() {
+    const content = document.getElementById('page-content');
+    content.style.animation = 'none';
+    content.offsetHeight;
+    content.style.animation = '';
+    content.innerHTML = pages[currentPage]
+      ? pages[currentPage].map(p => p.outerHTML).join('')
+      : '';
+
+    document.getElementById('page-indicator').textContent =
+      `Page ${currentPage + 1} of ${pages.length}`;
+    document.getElementById('prev-btn').disabled = currentPage === 0;
+    document.getElementById('next-btn').disabled = currentPage === pages.length - 1;
+  }
+
+  function nextPage() {
+    if (currentPage < pages.length - 1) { currentPage++; renderPage(); }
+  }
+
+  function prevPage() {
+    if (currentPage > 0) { currentPage--; renderPage(); }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextPage();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevPage();
+  });
+
+  document.getElementById('tap-next').addEventListener('click', nextPage);
+  document.getElementById('tap-prev').addEventListener('click', prevPage);
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(buildPages, 200);
+  });
+
+  window.addEventListener('load', buildPages);
+
+  // ── Starfield ──
+  const canvas = document.getElementById('stars');
+  const ctx    = canvas.getContext('2d');
+  let W, H, stars = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function initStars(n = 180) {
+    stars = Array.from({ length: n }, () => ({
+      x:  Math.random() * W,
+      y:  Math.random() * H,
+      r:  Math.random() * 1.1 + 0.2,
+      a:  Math.random(),
+      da: (Math.random() - 0.5) * 0.003
+    }));
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      s.a += s.da;
+      if (s.a < 0.05 || s.a > 1) s.da *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(245,236,215,${s.a.toFixed(2)})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(drawStars);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize(); initStars(); drawStars();
+</script>
+</body>
+</html>
