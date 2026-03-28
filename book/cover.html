@@ -27,15 +27,16 @@
       color: var(--parchment);
     }
 
-    /* ── starfield ── */
+    /* starfield behind everything, pointer-events off */
     #stars {
       position: fixed;
       inset: 0;
       z-index: 0;
+      pointer-events: none;
     }
 
-    body::before {
-      content: '';
+    /* vignette */
+    .vignette {
       position: fixed;
       inset: 0;
       background: radial-gradient(ellipse at 50% 50%, transparent 20%, rgba(10,6,2,0.9) 100%);
@@ -43,7 +44,26 @@
       pointer-events: none;
     }
 
-    /* ── hint text ── */
+    /* ember glow */
+    .glow {
+      position: fixed;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 500px;
+      height: 200px;
+      background: radial-gradient(ellipse, rgba(180,70,20,0.2) 0%, transparent 70%);
+      z-index: 1;
+      pointer-events: none;
+      animation: breathe 6s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: 0.6; }
+      50%       { opacity: 1.0; }
+    }
+
+    /* hint text */
     .hint {
       position: fixed;
       bottom: 2.5rem;
@@ -57,30 +77,30 @@
       color: var(--gold-dim);
       animation: pulse 3s ease-in-out infinite;
       white-space: nowrap;
+      pointer-events: none;
       transition: opacity 0.5s;
     }
-    .hint.hidden { opacity: 0; pointer-events: none; }
+    .hint.hidden { opacity: 0; }
 
     @keyframes pulse {
       0%, 100% { opacity: 0.4; }
       50%       { opacity: 1;   }
     }
 
-    /* ── book stage ── */
+    /* scene — sits above everything, catches clicks */
     .scene {
       position: relative;
-      z-index: 2;
+      z-index: 5;
       perspective: 2000px;
       cursor: pointer;
     }
 
-    /* Book sizing — portrait ratio */
     .book {
       position: relative;
-      width: min(340px, 80vw);
-      height: min(510px, 85vh);
+      width: min(340px, 75vw);
+      height: min(510px, 82vh);
       transform-style: preserve-3d;
-      transition: transform 0.3s ease;
+      transition: transform 0.3s ease, filter 0.3s ease;
       filter: drop-shadow(0 30px 60px rgba(0,0,0,0.8));
     }
 
@@ -90,56 +110,7 @@
               drop-shadow(0 0 40px rgba(201,151,58,0.15));
     }
 
-    /* Front cover */
-    .cover-front {
-      position: absolute;
-      inset: 0;
-      border-radius: 2px 8px 8px 2px;
-      overflow: hidden;
-      backface-visibility: hidden;
-      transform-origin: left center;
-      transform-style: preserve-3d;
-      transition: transform 1.4s cubic-bezier(0.645, 0.045, 0.355, 1.000);
-    }
-
-    .cover-front img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    /* Spine shadow overlay on cover */
-    .cover-front::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 8%, transparent 92%, rgba(0,0,0,0.2) 100%);
-      pointer-events: none;
-    }
-
-    /* Gold border frame on cover */
-    .cover-front::before {
-      content: '';
-      position: absolute;
-      inset: 8px;
-      border: 1px solid rgba(201,151,58,0.3);
-      border-radius: 1px;
-      pointer-events: none;
-      z-index: 2;
-    }
-
-    /* Back of the flipping cover (inside face — parchment) */
-    .cover-back {
-      position: absolute;
-      inset: 0;
-      background: #e8dcc8;
-      border-radius: 2px 8px 8px 2px;
-      backface-visibility: hidden;
-      transform: rotateY(180deg);
-    }
-
-    /* The page beneath (TOC peek) */
+    /* page beneath — shows when cover flips */
     .page-beneath {
       position: absolute;
       inset: 0;
@@ -177,16 +148,7 @@
       text-align: center;
     }
 
-    /* ── Flip state ── */
-    .scene.flipped .cover-front {
-      transform: rotateY(-180deg);
-    }
-
-    .scene.flipped .page-beneath {
-      opacity: 1;
-    }
-
-    /* Spine */
+    /* spine */
     .spine {
       position: absolute;
       left: -14px;
@@ -198,6 +160,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      pointer-events: none;
     }
 
     .spine-text {
@@ -211,79 +174,107 @@
       white-space: nowrap;
     }
 
-    /* Ambient glow */
-    .glow {
-      position: fixed;
-      bottom: -100px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 500px;
-      height: 200px;
-      background: radial-gradient(ellipse, rgba(180,70,20,0.2) 0%, transparent 70%);
-      z-index: 1;
-      pointer-events: none;
-      animation: breathe 6s ease-in-out infinite;
+    /* front cover — the flipping part */
+    .cover-front {
+      position: absolute;
+      inset: 0;
+      border-radius: 2px 8px 8px 2px;
+      overflow: hidden;
+      transform-origin: left center;
+      transform-style: preserve-3d;
+      transition: transform 1.4s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+      backface-visibility: hidden;
     }
 
-    @keyframes breathe {
-      0%, 100% { opacity: 0.6; }
-      50%       { opacity: 1.0; }
+    .cover-front img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+
+    /* gold border on cover */
+    .cover-front .frame {
+      position: absolute;
+      inset: 8px;
+      border: 1px solid rgba(201,151,58,0.3);
+      border-radius: 1px;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* spine shadow on cover */
+    .cover-front .shadow {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 8%, transparent 92%, rgba(0,0,0,0.2) 100%);
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    /* flip state */
+    .scene.flipped .cover-front {
+      transform: rotateY(-180deg);
+    }
+
+    .scene.flipped .page-beneath {
+      opacity: 1;
     }
   </style>
 </head>
 <body>
 
 <canvas id="stars"></canvas>
+<div class="vignette"></div>
 <div class="glow"></div>
-<p class="hint" id="hint">Open the book</p>
+<p class="hint" id="hint">&#10022; Open the book &#10022;</p>
 
 <div class="scene" id="scene">
+  <div class="book">
 
-  <!-- Page visible underneath when cover flips -->
-  <div class="page-beneath">
-    <p class="toc-title">Resonant Echoes</p>
-    <div class="toc-rule"></div>
-    <p class="toc-hint">Turning the page…</p>
+    <!-- page visible underneath when cover flips -->
+    <div class="page-beneath">
+      <p class="toc-title">Resonant Echoes</p>
+      <div class="toc-rule"></div>
+      <p class="toc-hint">Turning the page…</p>
+    </div>
+
+    <!-- spine -->
+    <div class="spine">
+      <span class="spine-text">Resonant Echoes</span>
+    </div>
+
+    <!-- flipping cover -->
+    <div class="cover-front" id="cover">
+      <img src="../images/cover.png" alt="Resonant Echoes">
+      <div class="frame"></div>
+      <div class="shadow"></div>
+    </div>
+
   </div>
-
-  <!-- The book spine -->
-  <div class="spine">
-    <span class="spine-text">Resonant Echoes</span>
-  </div>
-
-  <!-- The flipping cover -->
-  <div class="cover-front" id="cover">
-    <img src="../images/cover.png" alt="Resonant Echoes — Book Cover">
-    <div class="cover-back"></div>
-  </div>
-
 </div>
 
 <script>
-  const scene   = document.getElementById('scene');
-  const hint    = document.getElementById('hint');
-  let flipped   = false;
+  const scene    = document.getElementById('scene');
+  const hint     = document.getElementById('hint');
+  let flipped    = false;
   let navigating = false;
 
   scene.addEventListener('click', () => {
     if (navigating) return;
-
     if (!flipped) {
-      // First click — flip open
       flipped = true;
       scene.classList.add('flipped');
       hint.classList.add('hidden');
-
-      // After flip completes, navigate to TOC
       navigating = true;
       setTimeout(() => {
         window.location.href = 'toc.html';
       }, 1800);
-
     }
   });
 
-  // ── Starfield ──
+  // starfield
   const canvas = document.getElementById('stars');
   const ctx    = canvas.getContext('2d');
   let W, H, stars = [];
