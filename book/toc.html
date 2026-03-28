@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rivendawn — Coming Soon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #1a1208;
+      --parchment: #f5ecd7;
+      --gold:      #c9973a;
+      --gold-dim:  #8a6422;
+      --ember:     #b84a1a;
+      --shadow:    rgba(10,6,2,0.7);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--ink);
+      font-family: 'EB Garamond', Georgia, serif;
+      color: var(--parchment);
+      overflow: hidden;
+    }
+
+    /* ── starfield canvas ── */
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    /* ── vignette overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(10,6,2,0.85) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* ── ambient glow at bottom ── */
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -80px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 220px;
+      background: radial-gradient(ellipse, rgba(180,70,20,0.28) 0%, transparent 70%);
+      z-index: 1;
+      pointer-events: none;
+      animation: breathe 6s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: 0.7; transform: translateX(-50%) scaleX(1);   }
+      50%       { opacity: 1.0; transform: translateX(-50%) scaleX(1.15); }
+    }
+
+    /* ── center stage ── */
+    .stage {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 2rem;
+      text-align: center;
+      gap: 0;
+    }
+
+    /* ── ornamental rule ── */
+    .rule {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: min(560px, 90vw);
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 0.2s;
+    }
+    .rule::before, .rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
+    }
+    .rule svg { flex-shrink: 0; }
+
+    /* ── title ── */
+    .title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(2.4rem, 7vw, 5rem);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      line-height: 1.1;
+      color: var(--gold);
+      text-shadow:
+        0 0 40px rgba(201,151,58,0.5),
+        0 0 80px rgba(201,151,58,0.2),
+        2px 2px 0px rgba(10,6,2,0.8);
+      opacity: 0;
+      animation: fadeUp 1.4s ease forwards 0.5s;
+    }
+
+    .subtitle-line {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.7rem, 2vw, 0.95rem);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-top: 0.6rem;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 0.8s;
+    }
+
+    /* ── divider ── */
+    .divider {
+      margin: 2.2rem 0 2rem;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 1s;
+    }
+
+    /* ── body copy ── */
+    .lore {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      line-height: 1.75;
+      color: rgba(245,236,215,0.8);
+      max-width: 480px;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 1.2s;
+    }
+
+    .lore strong {
+      font-style: normal;
+      font-weight: 500;
+      color: var(--parchment);
+    }
+
+    /* ── status badge ── */
+    .badge {
+      margin-top: 2.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--gold-dim);
+      border-radius: 2px;
+      padding: 0.55rem 1.4rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 1.5s;
+      position: relative;
+    }
+    .badge::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 2px;
+      background: linear-gradient(135deg, rgba(201,151,58,0.15), transparent 60%);
+    }
+    .pip {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ember);
+      box-shadow: 0 0 8px var(--ember);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1;   box-shadow: 0 0 8px var(--ember); }
+      50%       { opacity: 0.4; box-shadow: 0 0 3px var(--ember); }
+    }
+
+    /* ── bottom rule ── */
+    .rule-bottom {
+      margin-top: 3rem;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 1.7s;
+    }
+
+    /* ── keyframes ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+
+    /* ── candle flicker particles ── */
+    .sparks {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      height: 200px;
+      z-index: 2;
+      pointer-events: none;
+      overflow: visible;
+    }
+    .spark {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--gold);
+      bottom: 0;
+      animation: rise var(--dur) ease-out var(--delay) infinite;
+      opacity: 0;
+    }
+    @keyframes rise {
+      0%   { opacity: 0.9; transform: translateX(0)    translateY(0)  scale(1);   }
+      60%  { opacity: 0.5; transform: translateX(var(--drift)) translateY(-120px) scale(0.8); }
+      100% { opacity: 0;   transform: translateX(var(--drift)) translateY(-200px) scale(0.3); }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<div class="sparks" id="sparks"></div>
+
+<main class="stage">
+
+  <div class="rule">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <path d="M11 1L13.2 8.5H21L14.9 13.2L17.1 20.7L11 16L4.9 20.7L7.1 13.2L1 8.5H8.8Z"
+            fill="none" stroke="#8a6422" stroke-width="1" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <h1 class="title">Rivendawn</h1>
+  <p class="subtitle-line">A tale of shadow &amp; reckoning</p>
+
+  <div class="divider">
+    <svg width="260" height="14" viewBox="0 0 260 14" fill="none">
+      <line x1="0"   y1="7" x2="100" y2="7" stroke="#8a6422" stroke-width="0.8"/>
+      <polygon points="106,7 118,2 118,12" fill="none" stroke="#8a6422" stroke-width="0.8"/>
+      <circle cx="130" cy="7" r="3.5" fill="#8a6422"/>
+      <polygon points="154,7 142,2 142,12" fill="none" stroke="#8a6422" stroke-width="0.8"/>
+      <line x1="160" y1="7" x2="260" y2="7" stroke="#8a6422" stroke-width="0.8"/>
+    </svg>
+  </div>
+
+  <p class="lore">
+    The pages are being set.<br>
+    The ink is <strong>not yet dry</strong>.<br><br>
+    Return soon — the story awaits those<br>
+    patient enough to hear it told.
+  </p>
+
+  <div class="badge">
+    <span class="pip"></span>
+    Under construction
+    <span class="pip"></span>
+  </div>
+
+  <div class="rule-bottom">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <path d="M11 1L13.2 8.5H21L14.9 13.2L17.1 20.7L11 16L4.9 20.7L7.1 13.2L1 8.5H8.8Z"
+            fill="none" stroke="#8a6422" stroke-width="1" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+</main>
+
+<script>
+  /* ── starfield ── */
+  const canvas = document.getElementById('stars');
+  const ctx = canvas.getContext('2d');
+  let W, H, stars = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function initStars(n = 220) {
+    stars = Array.from({ length: n }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.2 + 0.2,
+      a: Math.random(),
+      da: (Math.random() - 0.5) * 0.004
+    }));
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      s.a += s.da;
+      if (s.a < 0.05 || s.a > 1) s.da *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(245,236,215,${s.a.toFixed(2)})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(drawStars);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize(); initStars(); drawStars();
+
+  /* ── sparks ── */
+  const sparksEl = document.getElementById('sparks');
+  const sparkCount = 14;
+  for (let i = 0; i < sparkCount; i++) {
+    const s = document.createElement('div');
+    s.className = 'spark';
+    const left = (Math.random() * 240 + 30) + 'px';
+    const dur  = (Math.random() * 2.5 + 2) + 's';
+    const delay= (Math.random() * 4) + 's';
+    const drift= (Math.random() * 60 - 30) + 'px';
+    s.style.cssText = `left:${left};--dur:${dur};--delay:${delay};--drift:${drift}`;
+    sparksEl.appendChild(s);
+  }
+</script>
+</body>
+</html>
