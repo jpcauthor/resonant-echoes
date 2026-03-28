@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rivendawn — Enter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #1a1208;
+      --parchment: #f5ecd7;
+      --gold:      #c9973a;
+      --gold-dim:  #8a6422;
+      --ember:     #b84a1a;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--ink);
+      font-family: 'EB Garamond', Georgia, serif;
+      color: var(--parchment);
+      overflow: hidden;
+    }
+
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(10,6,2,0.85) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -80px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 220px;
+      background: radial-gradient(ellipse, rgba(180,70,20,0.28) 0%, transparent 70%);
+      z-index: 1;
+      pointer-events: none;
+      animation: breathe 6s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: 0.7; transform: translateX(-50%) scaleX(1);   }
+      50%       { opacity: 1.0; transform: translateX(-50%) scaleX(1.15); }
+    }
+
+    .stage {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 2rem;
+      text-align: center;
+      gap: 0;
+    }
+
+    .rule {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: min(560px, 90vw);
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 0.2s;
+    }
+    .rule::before, .rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
+    }
+
+    .title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(2.4rem, 7vw, 5rem);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      line-height: 1.1;
+      color: var(--gold);
+      text-shadow:
+        0 0 40px rgba(201,151,58,0.5),
+        0 0 80px rgba(201,151,58,0.2),
+        2px 2px 0px rgba(10,6,2,0.8);
+      opacity: 0;
+      animation: fadeUp 1.4s ease forwards 0.5s;
+    }
+
+    .subtitle-line {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.7rem, 2vw, 0.95rem);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-top: 0.6rem;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 0.8s;
+    }
+
+    .divider {
+      margin: 2.2rem 0 2rem;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 1s;
+    }
+
+    .lore {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      line-height: 1.75;
+      color: rgba(245,236,215,0.8);
+      max-width: 420px;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 1.1s;
+    }
+
+    /* GitHub login button */
+    .login-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      background: transparent;
+      border: 1px solid var(--gold-dim);
+      border-radius: 2px;
+      padding: 0.85rem 2rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.82rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      cursor: pointer;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.3s, border-color 0.3s;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 1.3s;
+    }
+
+    .login-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(201,151,58,0.1), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .login-btn:hover {
+      border-color: var(--gold);
+      color: var(--parchment);
+    }
+
+    .login-btn:hover::before {
+      opacity: 1;
+    }
+
+    .login-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* Error message */
+    .error-msg {
+      display: none;
+      margin-top: 1.5rem;
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: 0.95rem;
+      color: var(--ember);
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards;
+    }
+
+    .error-msg.visible {
+      display: block;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+
+    .sparks {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      height: 200px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .spark {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--gold);
+      bottom: 0;
+      animation: rise var(--dur) ease-out var(--delay) infinite;
+      opacity: 0;
+    }
+    @keyframes rise {
+      0%   { opacity: 0.9; transform: translateX(0) translateY(0) scale(1); }
+      60%  { opacity: 0.5; transform: translateX(var(--drift)) translateY(-120px) scale(0.8); }
+      100% { opacity: 0;   transform: translateX(var(--drift)) translateY(-200px) scale(0.3); }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div class="sparks" id="sparks"></div>
+
+<main class="stage">
+
+  <div class="rule">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <path d="M11 1L13.2 8.5H21L14.9 13.2L17.1 20.7L11 16L4.9 20.7L7.1 13.2L1 8.5H8.8Z"
+            fill="none" stroke="#8a6422" stroke-width="1" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <h1 class="title">Rivendawn</h1>
+  <p class="subtitle-line">Beta Reader Access</p>
+
+  <div class="divider">
+    <svg width="260" height="14" viewBox="0 0 260 14" fill="none">
+      <line x1="0"   y1="7" x2="100" y2="7" stroke="#8a6422" stroke-width="0.8"/>
+      <polygon points="106,7 118,2 118,12" fill="none" stroke="#8a6422" stroke-width="0.8"/>
+      <circle cx="130" cy="7" r="3.5" fill="#8a6422"/>
+      <polygon points="154,7 142,2 142,12" fill="none" stroke="#8a6422" stroke-width="0.8"/>
+      <line x1="160" y1="7" x2="260" y2="7" stroke="#8a6422" stroke-width="0.8"/>
+    </svg>
+  </div>
+
+  <p class="lore">
+    Only those with an invitation<br>
+    may turn these pages.<br><br>
+    Prove yourself, and the story shall unfold.
+  </p>
+
+  <a class="login-btn" id="login-link" href="#">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+    </svg>
+    Enter with GitHub
+  </a>
+
+  <p class="error-msg" id="error-msg"></p>
+
+</main>
+
+<script>
+  // ── Build the GitHub OAuth URL ──
+  const CLIENT_ID = 'Ov23li7we2EQzPF6jYX2';
+  const CALLBACK  = 'https://resonant-echoes.vercel.app/api/callback';
+  const githubURL = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=read:user`;
+  document.getElementById('login-link').href = githubURL;
+
+  // ── Show error messages if redirected back with ?error= ──
+  const params = new URLSearchParams(window.location.search);
+  const error  = params.get('error');
+  const errorEl = document.getElementById('error-msg');
+
+  const errorMessages = {
+    not_approved:  'Your name is not in the tome. Access is by invitation only.',
+    token_failed:  'The seal could not be verified. Please try again.',
+    no_code:       'The ritual was interrupted. Please try again.',
+    server_error:  'Something went wrong in the shadows. Please try again.'
+  };
+
+  if (error && errorMessages[error]) {
+    errorEl.textContent = errorMessages[error];
+    errorEl.classList.add('visible');
+  }
+
+  // ── Starfield ──
+  const canvas = document.getElementById('stars');
+  const ctx = canvas.getContext('2d');
+  let W, H, stars = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function initStars(n = 220) {
+    stars = Array.from({ length: n }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.2 + 0.2,
+      a: Math.random(),
+      da: (Math.random() - 0.5) * 0.004
+    }));
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      s.a += s.da;
+      if (s.a < 0.05 || s.a > 1) s.da *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(245,236,215,${s.a.toFixed(2)})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(drawStars);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize(); initStars(); drawStars();
+
+  // ── Sparks ──
+  const sparksEl = document.getElementById('sparks');
+  for (let i = 0; i < 14; i++) {
+    const s = document.createElement('div');
+    s.className = 'spark';
+    s.style.cssText = `left:${Math.random()*240+30}px;--dur:${Math.random()*2.5+2}s;--delay:${Math.random()*4}s;--drift:${Math.random()*60-30}px`;
+    sparksEl.appendChild(s);
+  }
+</script>
+</body>
+</html>
