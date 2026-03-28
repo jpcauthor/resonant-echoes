@@ -8,7 +8,7 @@
   <title>Resonant Echoes — Prologue</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
-  <style>
+<style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -16,19 +16,18 @@
       --gold-dim: #8a6422;
     }
 
-body {
-  --bg:       #f5ecd7;
-  --bg-2:     #ede0c4;
-  --text:     #2a1f0a;
-  --text-sub: #5a3e1b;
-  --rule:     #8a6422;
-  min-height: 100vh;
-  background: var(--bg);
-  font-family: 'EB Garamond', Georgia, serif;
-  color: var(--text);
-  transition: background 0.4s, color 0.4s;
-  overflow: hidden;
-}
+    body {
+      --bg:       #f5ecd7;
+      --bg-2:     #ede0c4;
+      --text:     #2a1f0a;
+      --text-sub: #5a3e1b;
+      --rule:     #8a6422;
+      background: var(--bg);
+      font-family: 'EB Garamond', Georgia, serif;
+      color: var(--text);
+      transition: background 0.4s, color 0.4s;
+      overflow: hidden;
+    }
 
     body.dark {
       --bg:       #1a1208;
@@ -50,16 +49,16 @@ body {
     body.dark #stars { opacity: 1; }
 
     /* ── Page container ── */
-.reader {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  height: 100dvh;
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 0 1.5rem 80px;
-}
+    .reader {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100dvh;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
 
     /* ── Chapter header ── */
     .chapter-header {
@@ -98,24 +97,18 @@ body {
 
     /* ── Text area ── */
     .text-area {
-      flex: 1;
       overflow: hidden;
       position: relative;
       padding: 1.5rem 0;
     }
 
-    /* Hidden pool of all paragraphs */
-    #para-pool {
-      display: none;
-    }
+    #para-pool { display: none; }
 
-    /* Visible page content */
     #page-content {
       height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      gap: 0;
       animation: pageFade 0.4s ease;
     }
 
@@ -131,11 +124,8 @@ body {
       margin-bottom: 1em;
     }
 
-    #page-content p:last-child {
-      margin-bottom: 0;
-    }
+    #page-content p:last-child { margin-bottom: 0; }
 
-    /* Entry heading style */
     #page-content p.entry-head {
       font-family: 'Cinzel', serif;
       font-size: calc(var(--font-size, 1.15rem) * 0.72);
@@ -147,7 +137,6 @@ body {
       line-height: 1.6;
     }
 
-    /* Marginalia style */
     #page-content p.marginalia {
       border-left: 2px solid var(--gold-dim);
       padding-left: 1rem;
@@ -156,23 +145,24 @@ body {
       margin-top: 0.5em;
     }
 
+    #page-content p.scene-break {
+      text-align: center;
+      color: var(--gold-dim);
+      font-style: normal;
+      letter-spacing: 0.5em;
+      margin: 0.5em 0;
+    }
+
     /* ── Bottom nav ── */
-.nav-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: var(--bg);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.8rem 1.5rem calc(1.2rem + env(safe-area-inset-bottom));
-  border-top: 1px solid rgba(138,100,34,0.2);
-  gap: 1rem;
-  max-width: 720px;
-  margin: 0 auto;
-}
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 0 1.2rem;
+      border-top: 1px solid rgba(138,100,34,0.2);
+      gap: 1rem;
+      background: var(--bg);
+    }
 
     .nav-btn {
       background: none;
@@ -188,15 +178,8 @@ body {
       white-space: nowrap;
     }
 
-    .nav-btn:hover:not(:disabled) {
-      color: var(--gold);
-      border-color: var(--gold);
-    }
-
-    .nav-btn:disabled {
-      opacity: 0.25;
-      cursor: default;
-    }
+    .nav-btn:hover:not(:disabled) { color: var(--gold); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.25; cursor: default; }
 
     .nav-center {
       display: flex;
@@ -215,7 +198,6 @@ body {
       opacity: 0.7;
     }
 
-    /* font size control */
     .font-controls {
       display: flex;
       align-items: center;
@@ -239,10 +221,7 @@ body {
       flex-shrink: 0;
     }
 
-    .font-btn:hover {
-      color: var(--gold);
-      border-color: var(--gold);
-    }
+    .font-btn:hover { color: var(--gold); border-color: var(--gold); }
 
     .theme-btn {
       background: none;
@@ -258,12 +237,8 @@ body {
       white-space: nowrap;
     }
 
-    .theme-btn:hover {
-      color: var(--gold);
-      border-color: var(--gold);
-    }
+    .theme-btn:hover { color: var(--gold); border-color: var(--gold); }
 
-    /* toc link */
     .toc-link {
       font-family: 'Cinzel', serif;
       font-size: 0.58rem;
