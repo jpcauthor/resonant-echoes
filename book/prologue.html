@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Resonant Echoes — Prologue</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
@@ -160,15 +161,15 @@ body {
     }
 
     /* ── Bottom nav ── */
-    .nav-bar {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.8rem 0 1.2rem;
-      border-top: 1px solid rgba(138,100,34,0.2);
-      gap: 1rem;
-    }
+.nav-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 0 calc(1.2rem + env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(138,100,34,0.2);
+  gap: 1rem;
+}
 
     .nav-btn {
       background: none;
