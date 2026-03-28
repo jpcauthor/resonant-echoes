@@ -49,7 +49,7 @@ export default async function handler(req, res) {
 
     // Approved! Redirect to the book with username in tow
     return res.redirect(
-      `https://jpcauthor.github.io/resonant-echoes/book/book.html?user=${encodeURIComponent(username)}`
+      `https://jpcauthor.github.io/resonant-echoes/book/cover.html?user=${encodeURIComponent(username)}`
     );
 
   } catch (err) {
