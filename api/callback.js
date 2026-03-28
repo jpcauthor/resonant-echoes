@@ -47,9 +47,14 @@ export default async function handler(req, res) {
       return res.redirect('https://jpcauthor.github.io/resonant-echoes/login.html?error=not_approved');
     }
 
-    // Approved! Redirect to the book with username in tow
+    // Generate a simple access token — timestamp + username + secret salt
+    const salt    = process.env.GITHUB_CLIENT_SECRET.slice(0, 8);
+    const payload = `${username}:${Date.now()}:${salt}`;
+    const encoded = Buffer.from(payload).toString('base64');
+
+    // Redirect to cover with token
     return res.redirect(
-      `https://jpcauthor.github.io/resonant-echoes/book/cover.html?user=${encodeURIComponent(username)}`
+      `https://jpcauthor.github.io/resonant-echoes/book/cover.html?token=${encoded}`
     );
 
   } catch (err) {

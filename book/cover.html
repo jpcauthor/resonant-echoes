@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
   <title>Resonant Echoes</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
@@ -27,7 +28,6 @@
       color: var(--parchment);
     }
 
-    /* starfield behind everything, pointer-events off */
     #stars {
       position: fixed;
       inset: 0;
@@ -35,7 +35,6 @@
       pointer-events: none;
     }
 
-    /* vignette */
     .vignette {
       position: fixed;
       inset: 0;
@@ -44,7 +43,6 @@
       pointer-events: none;
     }
 
-    /* ember glow */
     .glow {
       position: fixed;
       bottom: -100px;
@@ -63,7 +61,6 @@
       50%       { opacity: 1.0; }
     }
 
-    /* hint text */
     .hint {
       position: fixed;
       bottom: 2.5rem;
@@ -87,7 +84,6 @@
       50%       { opacity: 1;   }
     }
 
-    /* scene — sits above everything, catches clicks */
     .scene {
       position: relative;
       z-index: 5;
@@ -110,7 +106,6 @@
               drop-shadow(0 0 40px rgba(201,151,58,0.15));
     }
 
-    /* page beneath — shows when cover flips */
     .page-beneath {
       position: absolute;
       inset: 0;
@@ -148,7 +143,6 @@
       text-align: center;
     }
 
-    /* spine */
     .spine {
       position: absolute;
       left: -14px;
@@ -174,7 +168,6 @@
       white-space: nowrap;
     }
 
-    /* front cover — the flipping part */
     .cover-front {
       position: absolute;
       inset: 0;
@@ -194,7 +187,6 @@
       pointer-events: none;
     }
 
-    /* gold border on cover */
     .cover-front .frame {
       position: absolute;
       inset: 8px;
@@ -204,7 +196,6 @@
       z-index: 2;
     }
 
-    /* spine shadow on cover */
     .cover-front .shadow {
       position: absolute;
       inset: 0;
@@ -213,7 +204,6 @@
       z-index: 3;
     }
 
-    /* flip state */
     .scene.flipped .cover-front {
       transform: rotateY(-180deg);
     }
@@ -233,19 +223,16 @@
 <div class="scene" id="scene">
   <div class="book">
 
-    <!-- page visible underneath when cover flips -->
     <div class="page-beneath">
       <p class="toc-title">Resonant Echoes</p>
       <div class="toc-rule"></div>
       <p class="toc-hint">Turning the page…</p>
     </div>
 
-    <!-- spine -->
     <div class="spine">
       <span class="spine-text">Resonant Echoes</span>
     </div>
 
-    <!-- flipping cover -->
     <div class="cover-front" id="cover">
       <img src="../images/cover.png" alt="Resonant Echoes">
       <div class="frame"></div>
@@ -256,6 +243,26 @@
 </div>
 
 <script>
+  // ── Token guard — runs before anything else ──
+  (function() {
+    const params  = new URLSearchParams(window.location.search);
+    const token   = params.get('token');
+
+    if (token) {
+      // Valid token from login — store it and clean up the URL
+      sessionStorage.setItem('re_token', token);
+      window.history.replaceState({}, '', window.location.pathname);
+    } else {
+      // No token in URL — check if we have one stored from this session
+      const stored = sessionStorage.getItem('re_token');
+      if (!stored) {
+        // No token at all — send back to login
+        window.location.href = 'https://jpcauthor.github.io/resonant-echoes/login.html';
+      }
+    }
+  })();
+
+  // ── Page flip ──
   const scene    = document.getElementById('scene');
   const hint     = document.getElementById('hint');
   let flipped    = false;
@@ -274,7 +281,7 @@
     }
   });
 
-  // starfield
+  // ── Starfield ──
   const canvas = document.getElementById('stars');
   const ctx    = canvas.getContext('2d');
   let W, H, stars = [];
