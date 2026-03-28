@@ -459,81 +459,8 @@
   let pages       = [];
   let currentPage = 0;
 
-  function buildPages() {
-    const pool    = document.getElementById('para-pool');
-    const area    = document.getElementById('text-area');
-    const content = document.getElementById('page-content');
-    const paras   = Array.from(pool.children);
-    const areaH   = area.clientHeight;
-
-    pages = [];
-    let currentGroup = [];
-    let testDiv = document.createElement('div');
-    testDiv.style.cssText = `
-      position: absolute;
-      visibility: hidden;
-      width: ${content.clientWidth}px;
-      font-size: ${fontSize}rem;
-      line-height: 1.85;
-      font-family: 'EB Garamond', Georgia, serif;
-      padding: 0;
-    `;
-    document.body.appendChild(testDiv);
-
-    for (const para of paras) {
-      currentGroup.push(para);
-      testDiv.innerHTML = currentGroup.map(p => p.outerHTML).join('');
-      if (testDiv.scrollHeight > areaH * 0.82 && currentGroup.length > 1) {
-        currentGroup.pop();
-        pages.push([...currentGroup]);
-        currentGroup = [para];
-      }
-    }
-    if (currentGroup.length) pages.push([...currentGroup]);
-    document.body.removeChild(testDiv);
-
-    if (currentPage >= pages.length) currentPage = pages.length - 1;
-    renderPage();
-  }
-
-  function renderPage() {
-    const content = document.getElementById('page-content');
-    content.style.animation = 'none';
-    content.offsetHeight;
-    content.style.animation = '';
-    content.innerHTML = pages[currentPage]
-      ? pages[currentPage].map(p => p.outerHTML).join('')
-      : '';
-
-    document.getElementById('page-indicator').textContent =
-      `Page ${currentPage + 1} of ${pages.length}`;
-    document.getElementById('prev-btn').disabled = currentPage === 0;
-    document.getElementById('next-btn').disabled = currentPage === pages.length - 1;
-  }
-
-  function nextPage() {
-    if (currentPage < pages.length - 1) { currentPage++; renderPage(); }
-  }
-
-  function prevPage() {
-    if (currentPage > 0) { currentPage--; renderPage(); }
-  }
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextPage();
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevPage();
-  });
-
-  document.getElementById('tap-next').addEventListener('click', nextPage);
-  document.getElementById('tap-prev').addEventListener('click', prevPage);
-
-  let resizeTimer;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(buildPages, 200);
-  });
-
-  window.addEventListener('load', buildPages);
+  let pages       = [];
+  let currentPage = 0;
 
   // ── Starfield ──
   const canvas = document.getElementById('stars');
