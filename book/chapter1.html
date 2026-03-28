@@ -21,7 +21,6 @@
       --text:     #2a1f0a;
       --text-sub: #5a3e1b;
       --rule:     #8a6422;
-      min-height: 100vh;
       background: var(--bg);
       font-family: 'EB Garamond', Georgia, serif;
       color: var(--text);
@@ -37,6 +36,7 @@
       --rule:     #8a6422;
     }
 
+    /* starfield */
     #stars {
       position: fixed;
       inset: 0;
@@ -47,17 +47,19 @@
     }
     body.dark #stars { opacity: 1; }
 
+    /* ── Page container ── */
     .reader {
       position: relative;
       z-index: 1;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100dvh;
       max-width: 720px;
       margin: 0 auto;
       padding: 0 1.5rem;
     }
 
+    /* ── Chapter header ── */
     .chapter-header {
       padding: 2rem 0 1.2rem;
       text-align: center;
@@ -92,8 +94,8 @@
       opacity: 0.7;
     }
 
+    /* ── Text area ── */
     .text-area {
-      flex: 1;
       overflow: hidden;
       position: relative;
       padding: 1.5rem 0;
@@ -123,7 +125,6 @@
 
     #page-content p:last-child { margin-bottom: 0; }
 
-    /* Entry heading — for Watcher-style sub-headers */
     #page-content p.entry-head {
       font-family: 'Cinzel', serif;
       font-size: calc(var(--font-size, 1.15rem) * 0.72);
@@ -135,7 +136,6 @@
       line-height: 1.6;
     }
 
-    /* Marginalia — gold left border for Watcher asides */
     #page-content p.marginalia {
       border-left: 2px solid var(--gold-dim);
       padding-left: 1rem;
@@ -144,7 +144,6 @@
       margin-top: 0.5em;
     }
 
-    /* Scene break — centered ornament */
     #page-content p.scene-break {
       text-align: center;
       color: var(--gold-dim);
@@ -153,14 +152,15 @@
       margin: 0.5em 0;
     }
 
+    /* ── Bottom nav ── */
     .nav-bar {
-      flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0.8rem 0 1.2rem;
       border-top: 1px solid rgba(138,100,34,0.2);
       gap: 1rem;
+      background: var(--bg);
     }
 
     .nav-btn {
@@ -250,6 +250,7 @@
     }
     .toc-link:hover { opacity: 1; color: var(--gold); }
 
+    /* tap zones for mobile */
     .tap-prev, .tap-next {
       position: fixed;
       top: 0;
@@ -289,6 +290,8 @@
 
 <div id="para-pool">
 
+<p class="entry-head">Watcher’s Observation — 0001 — In Which Trees See Too Little and Share Much</p>
+
 <p><em>The forest knew of her. </em></p>
 <p><em>The evidence was visceral.</em></p>
 <p><em>The trees cannot stop their dramatic gossip, like courtiers whispering in the Courts of the Cradle.</em></p>
@@ -300,9 +303,7 @@
 <p><em>Also, her daughter’s keen sense of smell, her prescience of nature, and the simple fact of her innate brilliance told her, moments ago, that she is far from alone.</em></p>
 <p><em>If only her mother were so keen to her surroundings. But more blood is to be spilled.</em></p>
 <p><br /></p>
-<p><strong>Watcher’s Marginalia:</strong></p>
-<p><em>What is about to happen will set changes in motion, rewrite history, and bring people to their knees. I, of course, will be there to watch it transpire, catalog every moment, and keep my own hubris in check. But I will say this…</em></p>
-<p><em>I do find it exciting when the Shadow-Hunter appears. It is a precursor to the interesting—arriving in even the most mundane of moments. </em></p>
+<p class="marginalia"> Watcher’s Marginalia: What is about to happen will set changes in motion, rewrite history, and bring people to their knees. I, of course, will be there to watch it transpire, catalog every moment, and keep my own hubris in check. But I will say this… <br>I do find it exciting when the Shadow-Hunter appears. It is a precursor to the interesting—arriving in even the most mundane of moments.</p>
 <p> 	</p>
 <p><br /></p>
 <p>The ground, known to practitioners of Resonance as Terra, undulated beneath Ranessa's hand. Her fingers moved carefully in wave-like motions. The ground, like a drunken sailor, was seduced by the rhythmic motion and writhed in submission, writhing and falling as peb and dirt displaced.</p>
@@ -379,8 +380,7 @@
 <p>But now—we have a dying druid, an irritated Shadow-Hunter, and an unknown source whose fear still wafts through the air.</p>
 <p>I find myself rather… eager to see how this paths its way toward resolution.</p>
 <p><br /></p>
-<p>Watcher’s Marginalia</p>
-<p>I try not to play favorites, nor wish for certain outcomes—but this time? I suspect the Indomitable had a hand in it. Because what this leads to… will resonate beyond the normal scaffolding of linear time and its constraints.</p>
+<p class="marginalia"> Watccher's Marginalia: I try not to play favorites, nor wish for certain outcomes—but this time? I suspect the Indomitable had a hand in it. Because what this leads to… will resonate beyond the normal scaffolding of linear time and its constraints.</p>
 
 </div>
 
