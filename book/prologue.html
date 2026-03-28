@@ -403,7 +403,7 @@
     for (const para of paras) {
       currentGroup.push(para);
       testDiv.innerHTML = currentGroup.map(p => p.outerHTML).join('');
-      if (testDiv.scrollHeight > areaH - 20 && currentGroup.length > 1) {
+      if (testDiv.scrollHeight > areaH - 80 && currentGroup.length > 1) {
         currentGroup.pop();
         pages.push([...currentGroup]);
         currentGroup = [para];
