@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Resonant Echoes — Chapter Three</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:     #c9973a;
+      --gold-dim: #8a6422;
+    }
+
+    body {
+      --bg:       #f5ecd7;
+      --bg-2:     #ede0c4;
+      --text:     #2a1f0a;
+      --text-sub: #5a3e1b;
+      --rule:     #8a6422;
+      background: var(--bg);
+      font-family: 'EB Garamond', Georgia, serif;
+      color: var(--text);
+      transition: background 0.4s, color 0.4s;
+      overflow: hidden;
+    }
+
+    body.dark {
+      --bg:       #1a1208;
+      --bg-2:     #241a0c;
+      --text:     #f5ecd7;
+      --text-sub: #c9973a;
+      --rule:     #8a6422;
+    }
+
+    /* starfield */
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.6s;
+    }
+    body.dark #stars { opacity: 1; }
+
+    /* ── Page container ── */
+    .reader {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100dvh;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ── Chapter header ── */
+    .chapter-header {
+      padding: 2rem 0 1.2rem;
+      text-align: center;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(138,100,34,0.2);
+    }
+
+    .chapter-label {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.58rem, 1.5vw, 0.7rem);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+    }
+
+    .chapter-title {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      color: var(--gold);
+      margin-top: 0.3rem;
+      line-height: 1.3;
+    }
+
+    .chapter-sub {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.55rem, 1.3vw, 0.65rem);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      margin-top: 0.4rem;
+      opacity: 0.7;
+    }
+
+    /* ── Text area ── */
+    .text-area {
+      overflow: hidden;
+      position: relative;
+      padding: 1.5rem 0;
+    }
+
+    #para-pool { display: none; }
+
+    #page-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      animation: pageFade 0.4s ease;
+    }
+
+    @keyframes pageFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #page-content p {
+      font-size: var(--font-size, 1.15rem);
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 1em;
+    }
+
+    #page-content p:last-child { margin-bottom: 0; }
+
+    #page-content p.entry-head {
+      font-family: 'Cinzel', serif;
+      font-size: calc(var(--font-size, 1.15rem) * 0.72);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      font-style: normal;
+      margin-bottom: 1.4em;
+      line-height: 1.6;
+    }
+
+    #page-content p.marginalia {
+      border-left: 2px solid var(--gold-dim);
+      padding-left: 1rem;
+      font-style: italic;
+      color: var(--text-sub);
+      margin-top: 0.5em;
+    }
+
+    #page-content p.scene-break {
+      text-align: center;
+      color: var(--gold-dim);
+      font-style: normal;
+      letter-spacing: 0.5em;
+      margin: 0.5em 0;
+    }
+
+    /* ── Bottom nav ── */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 0 1.2rem;
+      border-top: 1px solid rgba(138,100,34,0.2);
+      gap: 1rem;
+      background: var(--bg);
+    }
+
+    .nav-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover:not(:disabled) { color: var(--gold); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.25; cursor: default; }
+
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      flex: 1;
+    }
+
+    .page-indicator {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      opacity: 0.7;
+    }
+
+    .font-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .font-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      cursor: pointer;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      transition: color 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .font-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .theme-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      padding: 0.4rem 0.7rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .theme-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .toc-link {
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      text-decoration: none;
+      opacity: 0.6;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    .toc-link:hover { opacity: 1; color: var(--gold); }
+
+    /* tap zones for mobile */
+    .tap-prev, .tap-next {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      z-index: 50;
+      cursor: pointer;
+      opacity: 0;
+    }
+    .tap-prev { left: 0; }
+    .tap-next { right: 0; }
+  </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<!-- ============================================================
+     CONTENT GOES HERE
+     
+     INSTRUCTIONS:
+     1. Copy the text from inside <body>...</body> in your 
+        Scrivener HTML export
+     2. Paste it between the #para-pool div tags below
+     3. Clean out any junk Scrivener tags you don't want
+     4. Use these special classes where needed:
+        - class="entry-head"   → Watcher-style sub-headers
+        - class="marginalia"   → Gold left-border asides
+        - class="scene-break"  → Put ✦ ✦ ✦ for scene breaks
+     
+     FILL IN:
+     - TBD CHAPTER LABEL  (e.g. "Chapter I" or "Prologue")
+     - TBD CHAPTER TITLE  (e.g. "When the Monster Stares Back")
+     - TBD PAGE TITLE     (in the <title> tag at the top)
+     - PREV / NEXT links  (update href on the nav buttons)
+============================================================ -->
+
+<div id="para-pool">
+
+  <p class="entry-head">Watcher's Observation — Entry: 0009 — Oath Bound No More</p>
+
+  <p>I would be a liar and a fool if I said to you I had not intended to stay, but I could not pull myself away.</p>
+
+  <p>The druid had carried, yet again, Greighton. This time he was gently deposited atop of a chaise in her office, and then summarily, but with dignity, told that she was excused, but to return.</p>
+
+  <p>Her and the girl.</p>
+
+  <p>This time cleaned.</p>
+
+  <p>Before Ranessa could respond. The door had been shut, and there stood Vael'Astra over the comatose form of Greighton.</p>
+
+  <p>"Who is she?" Elurien had asked.</p>
+
+  <p>And that's what woke him.</p>
+
+  <p>And again, the stubborn use of pronouns was beginning to wear thin on my sensibilities, because the man simply said, "Her."</p>
+
+  <p>Elurien had rolled her eyes to which Greighton said, "According to you," the Shadow Hunter responded dryly. "Prophecy."</p>
+
+  <p>She said nothing, but I know that look. It's one I often wonder if others could see in me.</p>
+
+  <p>Pensive.</p>
+
+  <p>"I'm releasing you," she said—no preamble, no ceremony. The oath between them, once forged in fire and necessity, now dissolved by little more than compassion. "You are free of the bond," she told him. "Free to follow her. To protect her, or not. To choose."</p>
+
+  <p>She added, "But your Oath to the Cradle? That must be released by the Council."</p>
+
+  <p>He did not speak at first. Only nodded—once. So sharply it could have been a salute, or a goodbye, or both. I would have followed him then, truth be told. But something in her stillness kept me rooted.</p>
+
+  <p>I should have left. I wish I had.</p>
+
+  <p>What I saw? The wounding of a great as Elurien Vael'Astra let several tears roll down perfect porcelain cheeks after the door shut. The gentle click may as well have been the shattering of the Velatrium, because it shook her.</p>
+
+  <p class="marginalia">I've never seen the Councilor Prime weep, and two tears seems like a deluge. If there had been a third, maybe the Crimson Citadel would have collapsed out of courtesy. And if I'm allowed a moment to be clear, she was shook. And so too, was I.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p>The Velatrium was stoic at heart, but ornately disguised as a place of genteel leadership and promises—that remain unfulfilled. As he walked the halls, the hangover the Resonant induced shell he slumbered in still hung about him like a cloud.</p>
+
+  <p>Its presence a darkening gloom.</p>
+
+  <p>Why had that song reacted that way?</p>
+
+  <p>He wanted to ask Elurien, but being released from a personal bond like theirs? There was nothing to say after that. He took his leave.</p>
+
+  <p>Grateful for what she had given him before today.</p>
+
+  <p>Honored that, today, she would release him from his oath.</p>
+
+  <p>As he continued to stroll through the halls of marbled stone, he could hear clicking and clacking in the shadows. He would stop—so would the sound.</p>
+
+  <p>He'd begin again—the sound as well.</p>
+
+  <p>He held a grin—and for the moment, a semblance of normalcy had reached out and gently lay a kiss to his cheek as if to welcome him to the moment.</p>
+
+  <p>"You," he began—his voice barely audible, but he knew she could hear it, "are not as quiet as you think you are."</p>
+
+  <p>There was an annoyed growl from the shadows past the pillars.</p>
+
+  <p>"Zona…" he said with faux-exasperation.</p>
+
+  <p>A white snow lioness strolled from a hidden alcove, her fur rippling with undulating violet stripes—an enticing distraction. Enticing… until her maw was wrapped around your throat.</p>
+
+  <p>She paused to lift one paw, inspecting it with regal disinterest, then lolled out her tongue to lap at a claw. Her eyes—vibrant, violet, intelligent—met Grey's.</p>
+
+  <p>The growl that rolled from her chest needed no translation: Still alive, I see.</p>
+
+  <p>He laughed, unable to hide his joy at seeing the one companion who never failed him, and he crouched before her, a gentle mumbling in greeting came forth as his head rested against hers.</p>
+
+  <p>"Still alive, still yours, my lady, but I have news."</p>
+
+  <p>She would have none of his news until their reunion was complete.</p>
+
+  <p>Regardless if it had only been hours.</p>
+
+  <p>The nuzzle that followed was affection, amplified by bond. Soothing resonance poured through him—compassion mingling with companionship.</p>
+
+  <p>Zona was more than a companion. She was a vow made flesh.</p>
+
+  <p>He had found her five cycles ago, a cub trembling beside her dying mother—bleeding, hunted. Grey had scooped her into his arms as her mother faded, his resonance a balm, a belladonna meant not to heal, but to ease the passing.</p>
+
+  <p>The mother vanished from sight—dissolved into harmonic shimmer—leaving behind a pool of blood that swirled unnaturally. It rose, curled, and settled into the cub's fur.</p>
+
+  <p>The violet stripes hadn't been there before that night.</p>
+
+  <p>But they've marked her ever since.</p>
+
+  <p>His faithful companion. The only one he truly believed would never betray him.</p>
+
+  <p>His Zona.</p>
+
+  <p>The cat pressed her brow against Grey's, as if trying to remind him of something he'd buried too deeply to name.</p>
+
+  <p>Her purr vibrated with more than comfort—it was a symphony of Resonance and peace, played in a key only they shared.</p>
+
+  <p>"Shadow Hunter!" a voice—young, new—but vibrant, cut through the peaceful moment with its own chaotic flow.</p>
+
+  <p>His head snapped up to see Ranessa strolling lazily, as if this were another mundane event in her life—but it was the other one. Her that gave him pause. She was smiling broadly. Ear-to-ear.</p>
+
+  <p>"Grey," Ranessa said to her, "call him Grey."</p>
+
+  <p>Thank you, Ranessa, he thought while rising—but then something strange happened. Something foreign to him, never experienced—a rarity in his life now—but still an event he never would have thought possible.</p>
+
+  <p>Zona took off as if she were chasing prey—ignoring his commands to stop.</p>
+
+  <p>She'd never done that.</p>
+
+  <p>His voice, authoritative as always, meant nothing to the lioness whose dagger-clawed feet scraped against the smooth stone floor.</p>
+
+  <p>The predator launched.</p>
+
+  <p>Graceful, devastating, inevitable. A blur of violet-striped white—muscle and claw and momentum. Her tail lashed behind her like a banner of war.</p>
+
+  <p>And her target?</p>
+
+  <p>The young woman from the woods. The one from his dreams.</p>
+
+  <p>She knelt, her arms open and inviting to the approaching big cat.</p>
+
+  <p>Where Ranessa held a powerful beauty that gracefully bordered between femininity and soul-destroying power, the kneeling woman was gently perfect—beautiful and unblemished—but that was about to change as the lion's leap carried the predator forward.</p>
+
+  <p>He felt as if the entirety of his world were about to crash about him, the woman from his 'prophetic vision,' as Vael'Astra called it, was about to die by the claws of his…</p>
+
+  <p>"Zonakaizonama," she squealed in delight.</p>
+
+  <p>And the cat roared in the same sentiment, massive front paws on her shoulders, pinning her down as a rough, wet, pink tongue slathered itself across the young woman.</p>
+
+  <p>He stood there.</p>
+
+  <p>Mouth agape.</p>
+
+  <p>Confusion swirling—with no answer to be found.</p>
+
+  <p>There was no tactical plan for this, no fancy dalliance with Resonance, coaxing the Song to his will. Instead, Greighton stood there in abject disbelief.</p>
+
+  <p>"By the Indomitable," his balance, his center askew in the moment as he watched without comprehension.</p>
+
+  <p>He'd seen Zona tear into Shadowcasters and their minions, rending them until their screams fell silent, but now she playfully nuzzled and rubbed her head against…</p>
+
+  <p>"She's marking her," he said—wild astonishment in the simple declaration.</p>
+
+  <p>"Did you hear what happened on the bridge?"</p>
+
+  <p>His head snapped to the source of the question.</p>
+
+  <p>Ranessa stood there with a dour look that could have passed for impassive boredom, but it still remained that she had her arms folded over her stomach. Grey shook his head.</p>
+
+  <p>All of this was too much.</p>
+
+  <p>"What happened?" he managed.</p>
+
+  <p>And he began to rather like Ranessa, even through the figure of the substantive crazy that invaded his life—because she told a story like he: short, efficient, time a consideration.</p>
+
+  <p>The guards had drawn weapons, and Sune had knocked them onto their backs with a powerful gust of Aeris.</p>
+
+  <p>"She is…"</p>
+
+  <p>"Sune," Ranessa interrupted. "Her name is Sune, and that's all she knows."</p>
+
+  <p>"Well, she knows Zona's full Resonant name," he added.</p>
+
+  <p>"They…"</p>
+
+  <p>Grey began to walk toward Zona and Sune, waving Ranessa's question away. "Another story for another day," he offered before he came to a stop before the young woman and the now suddenly domesticated house cat.</p>
+
+  <p>He still couldn't believe it. But this wasn't just disbelief in a sudden moment. She said the lioness' name. Her full name. This was just not right.</p>
+
+  <p>"What did you call her?"</p>
+
+  <p>"Zonakaizonama," the woman said, standing and dusting off the baggy leather breeches. "It means Bride-Warrior, and she would prefer it if you'd call her that more often," she offered, as if giving unsolicited advice was something that Grey wanted or needed.</p>
+
+  <p>Grey tried to maintain his composure—a hint of irritation crawling up his spine.</p>
+
+  <p>"I know," he said evenly. "That's what I named her."</p>
+
+  <p>Prismatic eyes shot up and stared at him, a contemplative look settling across soft features.</p>
+
+  <p>"Oh," she said as her face shifted from pensive to distant. "I know that…"</p>
+
+  <p>"You do…?" he asked—a distrustful hint of pessimism creeping into his voice. "I won—OW!"</p>
+
+  <p>He hopped away from the druid who stood next to him, most recently having ground her heel into the top of his boot.</p>
+
+  <p>"She's struggling with memory issues," and her voice took on a gentle tone.</p>
+
+  <p>However, through years of survival—he knew her tone would brook no resistance.</p>
+
+  <p>Plus, he was torn emotionally.</p>
+
+  <p>He wanted to take Ranessa and throw her through one of the ornate stained-glass windows, but then there was another part of him that enjoyed—no, rejoiced—that she didn't give a damn how she got his attention.</p>
+
+  <p>She just would do it.</p>
+
+  <p>But the woman's potency of Terra? It hurt—more specifically, his foot. That part was not pleasant. He was neither a sadist nor a masochist. Pain was neither enjoyed in the receiving, nor the delivering.</p>
+
+  <p>He was not certain about Ranessa, though, because the slender smile that she had on her face could have bespoken her enjoyment of his discomfort.</p>
+
+  <p>"Duly noted," he responded through clenched teeth.</p>
+
+  <p>His attention turned back to Zona, who was still affectionately marking 'Sune.' He took a few steps, his left foot taking gingerly applied approaches as pain radiated from the top of it.</p>
+
+  <p>He crouched and made eye contact. Those were, without a doubt, the same eyes from his dream—prophecy, he corrected himself.</p>
+
+  <p>"I had a vision of you," he said evenly.</p>
+
+  <p>"I dreamt of you," she responded—not warily, but with some form of otherworldly confidence.</p>
+
+  <p>"Zonakaizonama, to the shadows," he ordered—his voice low and rumbling like a thunderstorm.</p>
+
+  <p>This time, there was no pretense or faux inhibition that would prevent the predator from disobeying. She did as bidden—and thus those gathered about saw what Zona was.</p>
+
+  <p>She was a phase lioness.</p>
+
+  <p>Without a moment's hesitation, the white- and purple-striped predator shifted to a nearly translucent and ephemeral form—melding into the shadows, her eyes blinking away into nothingness.</p>
+
+  <p>"What," his attention returning to Sune, "did you dream?"</p>
+
+  <p>"That you…" he felt her eyes searching him, and all pretense of protection was gone.</p>
+
+  <p>He heard Ranessa's gasp, knowing she felt his defenses completely removed—exposing himself to the world of Rivendawn, naked of any Resonant defenses.</p>
+
+  <p>He watched those prismatic swirls speed up, her smile nearly touching her cheeks.</p>
+
+  <p>"I dreamt you would leave everything, that you would protect me, and…" her hand reached out, and he could feel her soft hand—warm and tender—touch his cheek. "You would figure out where we would go."</p>
+
+  <p>He leaned his face into her touch. Eyes closing, he lied to her, "I see."</p>
+
+  <p>"Will you?" she asked.</p>
+
+  <p>A voice—bored and as cold as the north—interrupted.</p>
+
+  <p>"The Council requests your presence—"</p>
+
+  <p>Grey bristled.</p>
+
+  <p>"Urk!" the voice said as panic seemingly suffused the air with its scent.</p>
+
+  <p>"You can wait…" Ranessa Barkroot said in a voice that would have chilled a grave.</p>
+
+  <p>"But…"</p>
+
+  <p>"Wait," came a baritone growl, the one where patience was as thin as rice paper.</p>
+
+  <p>Gently, he removed the hand from his face, fingers wrapping about those gentle digits protectively, and his head bowed once, then a second time in the affirmative.</p>
+
+  <p>"Yes," he answered her.</p>
+
+  <p>He would do it. The dream was becoming what Elurien said it was—a prophecy—and for once, Greighton Lastlight was not in the mood to fight.</p>
+
+  <p>Guiding Sune, hand in his, he walked past Ranessa and the frightened Herald, pausing with a grin as he peered over his shoulder at the druid.</p>
+
+  <p>"You too," he said to Ranessa. "I have a feeling that I cannot do this without help."</p>
+
+  <p>Turning, Ranessa peered to the Herald with a wicked, feral grin.</p>
+
+  <p>"Guess they get to see me too," and he watched as the druid strode next to him.</p>
+
+  <p>"I'm not holding your hand," she said with a growling laugh.</p>
+
+  <p>"My dreams," he laughed, "…crushed."</p>
+
+  <p>And even Sune giggled at the mumbled indignation coming from Ranessa.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p class="entry-head">Watcher's Observation — Entry: 0010 — The Cuddle Catastrophe</p>
+
+  <p>This was not—I did not—Zona does not cuddle strangers. She does not purr for prophecy.</p>
+
+  <p>There are rules. There were rules. Somewhere in the archives, I am certain I logged—Oh gods above and below, she licked her face. She's scent-marking the anomaly. The anomaly is giggling.</p>
+
+  <p>This is—This is going to be a very long entry.</p>
+
+  <p class="marginalia">Correction: it was a very short entry. Right up until the giant murder-cat decided to emotionally imprint on the Song's favorite variable. By the time Greighton, the Druid, and Sune were entering the Council Chambers with a pale faced Herald in their wake—I had regained my composure. Begrudgingly accepting the paw-prints in the margins.</p>
+
+</div>
+
+<!-- Mobile tap zones -->
+<div class="tap-prev" id="tap-prev"></div>
+<div class="tap-next" id="tap-next"></div>
+
+<div class="reader">
+
+  <div class="chapter-header">
+    <p class="chapter-label">Chapter Three</p>       <!-- e.g. Chapter I -->
+    <p class="chapter-title">The Hallway Accord</p>       <!-- e.g. When the Monster Stares Back -->
+      </div>
+
+  <div class="text-area" id="text-area">
+    <div id="page-content"></div>
+  </div>
+
+  <nav class="nav-bar">
+    <!-- Update href to point to previous chapter or toc -->
+    <button class="nav-btn" id="prev-btn" onclick="prevPage()" disabled>&#8592; Prev</button>
+
+    <div class="nav-center">
+<span class="page-indicator" id="page-indicator">Page 1</span>
+      <div class="font-controls">
+        <button class="font-btn" onclick="adjustFont(-1)" title="Smaller">A&#8331;</button>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">&#9790; Dark</button>
+        <button class="font-btn" onclick="adjustFont(1)"  title="Larger">A&#8314;</button>
+      </div>
+      <a class="toc-link" href="toc.html">&#8617; Contents</a>
+    </div>
+
+    <!-- Update href to point to next chapter -->
+    <button class="nav-btn" id="next-btn" onclick="nextPage()">Next &#8594;</button>
+  </nav>
+
+</div>
+
+<script>
+ // ── Token guard ──
+  (function() {
+    const token = sessionStorage.getItem('re_token');
+    if (!token) {
+      window.location.href = 'https://jpcauthor.github.io/resonant-echoes/login.html';
+    }
+  })();
+
+  // ── Theme ──
+  const body     = document.body;
+  const themeBtn = document.getElementById('theme-btn');
+  const saved    = localStorage.getItem('re_theme') || 'dark';
+
+  if (saved === 'dark') { body.classList.add('dark'); themeBtn.textContent = '☀ Light'; }
+  else { themeBtn.textContent = '☽ Dark'; }
+
+  function toggleTheme() {
+    const isDark = body.classList.toggle('dark');
+    themeBtn.textContent = isDark ? '☀ Light' : '☽ Dark';
+    localStorage.setItem('re_theme', isDark ? 'dark' : 'light');
+    buildPages();
+  }
+
+  // ── Font size ──
+  let fontSize = parseFloat(localStorage.getItem('re_fontsize') || '1.15');
+  document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+
+  function adjustFont(dir) {
+    fontSize = Math.min(1.6, Math.max(0.9, fontSize + dir * 0.1));
+    localStorage.setItem('re_fontsize', fontSize);
+    document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+    buildPages();
+  }
+
+  // ── Pagination engine ──
+  let pages       = [];
+  let currentPage = 0;
+
+  function buildPages() {
+    const pool    = document.getElementById('para-pool');
+    const area    = document.getElementById('text-area');
+    const content = document.getElementById('page-content');
+    const paras   = Array.from(pool.children);
+    const areaH   = area.clientHeight;
+
+    pages = [];
+    let currentGroup = [];
+
+    const testDiv = document.createElement('div');
+    testDiv.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      visibility: hidden;
+      pointer-events: none;
+      width: ${content.clientWidth}px;
+      font-size: ${fontSize}rem;
+      line-height: 1.85;
+      font-family: 'EB Garamond', Georgia, serif;
+      padding: 0;
+      margin: 0;
+    `;
+    area.appendChild(testDiv);
+
+    const threshold = areaH * 0.82;
+
+    for (const para of paras) {
+      currentGroup.push(para);
+      testDiv.innerHTML = currentGroup.map(p => p.outerHTML).join('');
+
+      if (testDiv.offsetHeight > threshold && currentGroup.length > 1) {
+        currentGroup.pop();
+        pages.push([...currentGroup]);
+        currentGroup = [para];
+        testDiv.innerHTML = para.outerHTML;
+      }
+    }
+
+    if (currentGroup.length) pages.push([...currentGroup]);
+    area.removeChild(testDiv);
+
+    if (currentPage >= pages.length) currentPage = pages.length - 1;
+    renderPage();
+  }
+
+  function renderPage() {
+    const content = document.getElementById('page-content');
+    content.style.animation = 'none';
+    content.offsetHeight;
+    content.style.animation = '';
+    content.innerHTML = pages[currentPage]
+      ? pages[currentPage].map(p => p.outerHTML).join('')
+      : '';
+
+    document.getElementById('page-indicator').textContent =
+      `Page ${currentPage + 1} of ${pages.length}`;
+    document.getElementById('prev-btn').disabled = currentPage === 0;
+    document.getElementById('next-btn').disabled = currentPage === pages.length - 1;
+  }
+
+  function nextPage() {
+    if (currentPage < pages.length - 1) { currentPage++; renderPage(); }
+  }
+
+  function prevPage() {
+    if (currentPage > 0) { currentPage--; renderPage(); }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextPage();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevPage();
+  });
+
+  document.getElementById('tap-next').addEventListener('click', nextPage);
+  document.getElementById('tap-prev').addEventListener('click', prevPage);
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(buildPages, 200);
+  });
+
+  window.addEventListener('load', buildPages);
+
+  // ── Starfield ──
+  const canvas = document.getElementById('stars');
+  const ctx    = canvas.getContext('2d');
+  let W, H, stars = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function initStars(n = 180) {
+    stars = Array.from({ length: n }, () => ({
+      x:  Math.random() * W,
+      y:  Math.random() * H,
+      r:  Math.random() * 1.1 + 0.2,
+      a:  Math.random(),
+      da: (Math.random() - 0.5) * 0.003
+    }));
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      s.a += s.da;
+      if (s.a < 0.05 || s.a > 1) s.da *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(245,236,215,${s.a.toFixed(2)})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(drawStars);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize(); initStars(); drawStars();
+</script>
+</body>
+</html>
