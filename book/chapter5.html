@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Resonant Echoes — Chapter Five</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:     #c9973a;
+      --gold-dim: #8a6422;
+    }
+
+    body {
+      --bg:       #f5ecd7;
+      --bg-2:     #ede0c4;
+      --text:     #2a1f0a;
+      --text-sub: #5a3e1b;
+      --rule:     #8a6422;
+      background: var(--bg);
+      font-family: 'EB Garamond', Georgia, serif;
+      color: var(--text);
+      transition: background 0.4s, color 0.4s;
+      overflow: hidden;
+    }
+
+    body.dark {
+      --bg:       #1a1208;
+      --bg-2:     #241a0c;
+      --text:     #f5ecd7;
+      --text-sub: #c9973a;
+      --rule:     #8a6422;
+    }
+
+    /* starfield */
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.6s;
+    }
+    body.dark #stars { opacity: 1; }
+
+    /* ── Page container ── */
+    .reader {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100dvh;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ── Chapter header ── */
+    .chapter-header {
+      padding: 2rem 0 1.2rem;
+      text-align: center;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(138,100,34,0.2);
+    }
+
+    .chapter-label {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.58rem, 1.5vw, 0.7rem);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+    }
+
+    .chapter-title {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      color: var(--gold);
+      margin-top: 0.3rem;
+      line-height: 1.3;
+    }
+
+    .chapter-sub {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.55rem, 1.3vw, 0.65rem);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      margin-top: 0.4rem;
+      opacity: 0.7;
+    }
+
+    /* ── Text area ── */
+    .text-area {
+      overflow: hidden;
+      position: relative;
+      padding: 1.5rem 0;
+    }
+
+    #para-pool { display: none; }
+
+    #page-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      animation: pageFade 0.4s ease;
+    }
+
+    @keyframes pageFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #page-content p {
+      font-size: var(--font-size, 1.15rem);
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 1em;
+    }
+
+    #page-content p:last-child { margin-bottom: 0; }
+
+    #page-content p.entry-head {
+      font-family: 'Cinzel', serif;
+      font-size: calc(var(--font-size, 1.15rem) * 0.72);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      font-style: normal;
+      margin-bottom: 1.4em;
+      line-height: 1.6;
+    }
+
+    #page-content p.marginalia {
+      border-left: 2px solid var(--gold-dim);
+      padding-left: 1rem;
+      font-style: italic;
+      color: var(--text-sub);
+      margin-top: 0.5em;
+    }
+
+    #page-content p.scene-break {
+      text-align: center;
+      color: var(--gold-dim);
+      font-style: normal;
+      letter-spacing: 0.5em;
+      margin: 0.5em 0;
+    }
+
+    /* ── Bottom nav ── */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 0 1.2rem;
+      border-top: 1px solid rgba(138,100,34,0.2);
+      gap: 1rem;
+      background: var(--bg);
+    }
+
+    .nav-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover:not(:disabled) { color: var(--gold); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.25; cursor: default; }
+
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      flex: 1;
+    }
+
+    .page-indicator {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      opacity: 0.7;
+    }
+
+    .font-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .font-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      cursor: pointer;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      transition: color 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .font-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .theme-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      padding: 0.4rem 0.7rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .theme-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .toc-link {
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      text-decoration: none;
+      opacity: 0.6;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    .toc-link:hover { opacity: 1; color: var(--gold); }
+
+    /* tap zones for mobile */
+    .tap-prev, .tap-next {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      z-index: 50;
+      cursor: pointer;
+      opacity: 0;
+    }
+    .tap-prev { left: 0; }
+    .tap-next { right: 0; }
+  </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<div id="para-pool">
+
+  <p class="entry-head">Watcher's Observation — Entry: 0013 — He Started off Strong</p>
+
+  <p>I know what he's about to tell them. Some will be aghast in shock. Others will not give a passing care about it.</p>
+
+  <p>He, however, is the only one that cares, and that he's never spoken of this past, even in such a formal and packed environment, bespeaks the volume in which people should listen.</p>
+
+  <p>Volume.</p>
+
+  <p>They need to lower theirs.</p>
+
+  <p>They need to turn his up.</p>
+
+  <p>They need to listen—and stop being judgmental pessimists and naysayers.</p>
+
+  <p>All of them.</p>
+
+  <p class="marginalia">I nearly called them disgusting, but the curious look on Sune's face gave me pause. The girl hasn't an idea what he is about to do. That he is about to do it for her. And that makes this—even more soul-twisting.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p>When he spoke, she turned her attention up to him. He stood there in black leathers. Thick ones—ones she idly wondered could deflect or simply ignore the sharper attacks a man of his nature might deal with.</p>
+
+  <p>One of those same thoughts was shoved away, a mental hand waving it off like wafting smoke that approached her eyes—distracting.</p>
+
+  <p>"…vacate my position is because of what I witnessed after I passed judgment on the clandestine Shadowmancer that everyone knows as Lorn Zyreth, or as Librarian Zyreth of the Crimson Citadel."</p>
+
+  <p>That statement brought up a name many wished had survived—Grevon having taken over control of the Crimson Citadel after Zyreth's death—but the why was now being answered to a multitude that, she wondered, never knew to ask why.</p>
+
+  <p>Sune had no idea who Zyreth was, nor any…</p>
+
+  <p>The Crimson Citadel was a bastion of thought, knowledge—collectors of a past that most wished didn't exist—and… she looked up to Grey, her eyes widening. There was a sense of disbelief and shock that gripped Sune to the core of her heart.</p>
+
+  <p>Was he… she began to wonder.</p>
+
+  <p>"I was, or I guess I still am, Greighton, the former Captain of the Vanguard's Redoubt of the Crimson Citadel, and I was excommunicated from the Citadel for enforcing the archaic rotes," he said—and she could hear the defeat in his voice.</p>
+
+  <p>The Captain.</p>
+
+  <p>She knew of him.</p>
+
+  <p>But why? But how?</p>
+
+  <p>Who was he? Wasn't he a man from her dreams? A man meant to…</p>
+
+  <p>Protect her? Would he do the same to her?</p>
+
+  <p>In her mind, a memory flashed—briefly, but vividly.</p>
+
+  <p>Greighton stood with others—a man, big and powerful, and a woman, short and stout with a tender face—and they fought, but it was a song. She could hear it in the back of her mind as Grey droned on.</p>
+
+  <p>She half-listened to him—explaining that he had suspicions, and Lorn confirmed them by trying to strangle Greighton with shadow tendrils.</p>
+
+  <p>And the song continued in the back of her mind—of the trio who fought against shadows, neither man nor woman, neither real nor faux—but foes meant to destroy. But the song—it woke up a memory.</p>
+
+  <p>Of their battle.</p>
+
+  <p>Of their victory.</p>
+
+  <p>No, Grey wouldn't betray her—that much was now obvious to her, albeit through a song—but it was another memory, one she would cling to.</p>
+
+  <p>He was their Captain. They followed without question. That was the chorus of the song—or songs—too many to discern at the moment, but they all sang to the same thing.</p>
+
+  <p>Greighton—Captain of the Vanguard's Redoubt—standing behind his people, victorious against threats against knowledge, the undead, and even…</p>
+
+  <p>Her attention snapped to him—uncertain as to why—Sune focused on Grey's words.</p>
+
+  <p>"…when I struck Lorn down, my blades acted as a conduit—to what? To whom? I know not, but I was drawn into something…"</p>
+
+  <p>"This is inane!" Kael's voice cut through. "If this were true, Songweavers would have been singing about this for a decade; this is simply proof that the Shadow Hunter wishes to escape war with The Forge, avoiding his mother's retribution!"</p>
+
+  <p>His mother?</p>
+
+  <p>Her retribution?</p>
+
+  <p>She shared a glance with Ranessa, who looked as if she had been invited to a secret, and her face was purely one of empathy—an understanding that Sune hadn't a clue as to why.</p>
+
+  <p>"You will be silent, Kael," Draveth said. "Speaking out of turn is…"</p>
+
+  <p>"He knows the laws of the Council," the woman from the bridge said. "He won't dare," and there was a cold iciness in the woman's eyes as she stared across the dais at the beautiful man. "Do it again, will you?"</p>
+
+  <p>The man nodded—and perhaps, probably, made the better judgment not to speak.</p>
+
+  <p>Sune knew fear. She knew being hunted.</p>
+
+  <p>The man looked like prey that was about to be devoured by a predator.</p>
+
+  <p>He said nothing more.</p>
+
+  <p>"Continue," Draveth said formally.</p>
+
+  <p>Her attention was focused upon Grey once more, and she could see the small but subtle micro-vibrations around him—as if verbalizing his past was exposing him in a way that was most uncomfortable to his senses.</p>
+
+  <p>"I had a vision, but some," and she followed his gaze. He was looking at the woman from the bridge—directly at her. "Say that it's prophecy," and that's when she felt his gaze upon her.</p>
+
+  <p>"These eyes—prismatic, dazzling, brilliant—are what I saw, and now I can no longer deny that my purpose is with her, and not the needs of the Cradle nor its Council."</p>
+
+  <p>Murmurs arose from the gallery and even from the dais, but as Grey took his seat, she saw the subtle motion of Ranessa's shoulder. She gently—nearly imperceptible to others—pressed her own to Grey's, a sign—mayhap—of solidarity between the two.</p>
+
+  <p>She tried to smile as Grey said what he did, but there was some mysterious weight behind those words, and Sune wasn't sure how to catalog or even process them.</p>
+
+  <p>"I can feel in my heart, in the weaving of the Song, that if I am not the one to protect her, then what we know as Rivendawn will not be what it is today, nor can it return, ever, to what it was yesteryear."</p>
+
+  <p>There was more than a smattering of murmurs. Instead, there were shouts of indignation—from the gallery, from the farmers and workers of the land.</p>
+
+  <p>They called Grey a traitor and coward.</p>
+
+  <p>"No different than when you left your Vanguard to rot in prison!" an old crone shouted over and over, spittle flying from the old woman's mouth as she shook a cane toward the table.</p>
+
+  <p>Sune's eyes went wide—and she felt fear again, but then the concussive boom that shook the Council Chamber brought her a sense of security. She knew, or felt, that it wasn't meant for her.</p>
+
+  <p>"Silence yourselves or leave!"</p>
+
+  <p>The woman from the bridge's voice boomed, shaking the walls, dust even falling from the ceiling's trestles.</p>
+
+  <p>The mumbles and shouts died away as men and women in golden uniforms came to stand before the gallery.</p>
+
+  <p>It was the Councilor Prime, Vael'Astra—if she remembered correctly—who cast a menacing look to all the others in the crowd, her silken robes billowing angrily.</p>
+
+  <p>Just then, a short and rotund woman stood up, older, with all gray hair settled neatly atop her head in a topknot, and cleared her throat.</p>
+
+  <p>"Hearthwarden Coral?" Draveth questioned.</p>
+
+  <p>"I," and Sune heard the gentility in the woman's voice—soft, tender, "motion that the Council take to vote and release the Shadow Hunter from his position."</p>
+
+  <p>Murmurs started again.</p>
+
+  <p>Vael'Astra cleared her throat—and the chamber quieted.</p>
+
+  <p>"I second," a man—seemingly timid in voice—but in physical presence a waif of a man remained seated.</p>
+
+  <p>Draveth went on about some particulars in the vote, finishing with a line that, when their name was called, they may have their say, but then must cast their vote.</p>
+
+  <p>"Representing the Peacewardens of the Cradle—Councilor Serith Veyren, how do you vote?"</p>
+
+  <p>He rose with easy fluidity and bowed his head. "I trust the Shadow Hunter speaks the truth. Peace must be maintained. I vote aye."</p>
+
+  <p>"Representing the Physickers—Councilor Corthal, how do you vote?"</p>
+
+  <p>The woman rose, hand over heart, her voice warm and clear. "Compassion compels me. Aye."</p>
+
+  <p>"Councilor Meerun of the Shadow Jailers."</p>
+
+  <p>Sune found it interesting that he—</p>
+
+  <p>A voice like something dragged from the grave answered. A man clad in black robes, eyes a piercing red, rested a hand on the pommel of his flail. "Aye," was all he said.</p>
+
+  <p>"Who…" Sune began to whisper, but felt Grey's hand settle gently on her shoulder, squeezing as if to say, later.</p>
+
+  <p>"Councilor Kael of the Songweavers," Draveth said, his voice slipping back into its bored cadence. "How do—"</p>
+
+  <p>"N'aye! He dares to leave us to defend ourselves with—"</p>
+
+  <p>"Silence!" Vael'Astra boomed. "You speak out of turn, in violation of the Archaic Laws."</p>
+
+  <p>"I will—" Niven Kael—the most beautiful man Sune had ever seen—began to protest.</p>
+
+  <p>"Breccan Urnkeeper, how do you vote?" Draveth's voice carried over Kael's simpering.</p>
+
+  <p>The stout, powerfully built dwarf—or Kardurin, as Ranessa called them—pushed himself upright. "You don't unfasten the keystone when the walls still stand. Nay."</p>
+
+  <p>"As the representative of the Traders' Guilds, I, Draveth, vote n'aye as well," he added, that ever-present boredom threading his tone.</p>
+
+  <p>Panic stirred in Sune's chest.</p>
+
+  <p>Six votes. Three aye. Three n'aye. That meant—</p>
+
+  <p>"As there is a tie of three-to-three, how does the Councilor Prime vote?" Draveth asked, a faint smile tugging at his lips.</p>
+
+  <p>Sune read it clearly: You always get what you want, Elurien.</p>
+
+  <p>"I vote aye."</p>
+
+  <p>"The vote has passed. But in keeping with the Archaic Laws of the Council, as the Gallery is open, one may speak for the Gallery," Draveth said, going through the motions, Sune surmised.</p>
+
+  <p>"Have you select—"</p>
+
+  <p>"I'll do it!" the angry crone from earlier shouted.</p>
+
+  <p>Draveth blinked, visibly taken aback.</p>
+
+  <p>"Very well," he began, recovering a breath later.</p>
+
+  <p>"Just wait a minute!"</p>
+
+  <p>The voice cut through the chamber like gravel on glass.</p>
+
+  <p>"I move slower these days…"</p>
+
+  <p>The crone shuffled forward from the Gallery, her youth long lost to history. She made her way toward the podium to the right of the table where Ranessa sat.</p>
+
+  <p>"Very well," Vael'Astra replied.</p>
+
+  <p>There was no exasperation in her tone—but her expression sharpened.</p>
+
+  <p>"Wait!" the Councilor Prime boomed.</p>
+
+  <p>It started with surprise. Then fury. The whiplash was the first sign.</p>
+
+  <p>Sune felt it.</p>
+
+  <p>The Wellspring stirred. The Song howled in discord.</p>
+
+  <p>And then—Grey moved.</p>
+
+  <p>Fast. Terrifyingly fast.</p>
+
+  <p>Steel rang as swords were unsheathed—and hurled.</p>
+
+  <p>The crone laughed.</p>
+
+  <p>Then her flesh melted.</p>
+
+  <p>Shadows filled the spaces where bone should have been, the only thing holding her shape together.</p>
+
+  <p>The swords tore through her, punching holes in the darkness—but the shadows closed just as quickly.</p>
+
+  <p>Her laughter was melodic. Enticing—wrong. It made Sune's skin crawl and warm all at once.</p>
+
+  <p>When the shadows coalesced into a human form, her voice turned to silken allure, and Sune's muscles went weak.</p>
+
+  <p>"You'll have to do better than that, Greighton."</p>
+
+  <p>The voice was poison dipped in honey.</p>
+
+  <p>Jadsia.</p>
+
+  <p>Her laughter unfurled like velvet over broken glass as shadow-tendrils exploded outward.</p>
+
+  <p>The discarded flesh hit the floor like a dropped robe.</p>
+
+  <p>"And the Dominus sends his regards," Jadsia purred—half delirious cackle, half irresistible melody.</p>
+
+  <p>Her body, now entirely shadow, began to drink the light from the chamber—hunger made manifest.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p class="entry-head">Watcher's Observation — Entry: 0014 — Something Did Stink, and It Wasn't Shadowmancy — It Was Just Jadsia</p>
+
+  <p>Well, it was an entrance worthy of Cradle Politics.</p>
+
+  <p>Jadsia arrived, as an old crone, then dissolved what flesh the woman had, only to turn back into shadows.</p>
+
+  <p>I wonder, does anyone know what happened to the real crone? I'm just curious. I've been a tad busy observing the drama that follows our three and the wake of chaos it leaves.</p>
+
+  <p>Grey is, if anything, entertaining to watch.</p>
+
+  <p>He moves with an alacrity that could be powered by the Song, but he's yet to implement it, and that, in the reality of Rivendawn, is scary.</p>
+
+  <p>Not that he holds back—that's not scary. That's a well trained man.</p>
+
+  <p>The part that is scary? What is going to make Grey remove the governors that control his strengths and powers—because whatever that might be?</p>
+
+  <p>We all ought to be very afraid.</p>
+
+  <p class="marginalia">Welcome to Rivendawn, Sune. I see you seated there behind that table. But you don't act like someone who is being baptized in the surreal craziness that is Rivendawn. Who are you, child? What discordant note in the symphony of the Song are you really? I am, by design, a patient man, but even now my own patience wanes—as my thirst for the answers grows, and my worry that it can never be slaked.</p>
+
+</div>
+
+<!-- Mobile tap zones -->
+<div class="tap-prev" id="tap-prev"></div>
+<div class="tap-next" id="tap-next"></div>
+
+<div class="reader">
+
+  <div class="chapter-header">
+    <p class="chapter-label">Chapter Five</p>
+    <p class="chapter-title">A Request Followed by Poor Courtly Taste</p>
+    <p class="chapter-sub">Resonant Echoes</p>
+  </div>
+
+  <div class="text-area" id="text-area">
+    <div id="page-content"></div>
+  </div>
+
+  <nav class="nav-bar">
+    <button class="nav-btn" id="prev-btn" onclick="prevPage()" disabled>&#8592; Prev</button>
+
+    <div class="nav-center">
+      <span class="page-indicator" id="page-indicator">Page 1</span>
+      <div class="font-controls">
+        <button class="font-btn" onclick="adjustFont(-1)" title="Smaller">A&#8331;</button>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">&#9790; Dark</button>
+        <button class="font-btn" onclick="adjustFont(1)"  title="Larger">A&#8314;</button>
+      </div>
+      <a class="toc-link" href="toc.html">&#8617; Contents</a>
+    </div>
+
+    <button class="nav-btn" id="next-btn" onclick="nextPage()">Next &#8594;</button>
+  </nav>
+
+</div>
+
+<script>
+  // ── Token guard ──
+  (function() {
+    const token = sessionStorage.getItem('re_token');
+    if (!token) {
+      window.location.href = 'https://jpcauthor.github.io/resonant-echoes/login.html';
+    }
+  })();
+
+  // ── Theme ──
+  const body     = document.body;
+  const themeBtn = document.getElementById('theme-btn');
+  const saved    = localStorage.getItem('re_theme') || 'dark';
+
+  if (saved === 'dark') { body.classList.add('dark'); themeBtn.textContent = '☀ Light'; }
+  else { themeBtn.textContent = '☽ Dark'; }
+
+  function toggleTheme() {
+    const isDark = body.classList.toggle('dark');
+    themeBtn.textContent = isDark ? '☀ Light' : '☽ Dark';
+    localStorage.setItem('re_theme', isDark ? 'dark' : 'light');
+    buildPages();
+  }
+
+  // ── Font size ──
+  let fontSize = parseFloat(localStorage.getItem('re_fontsize') || '1.15');
+  document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+
+  function adjustFont(dir) {
+    fontSize = Math.min(1.6, Math.max(0.9, fontSize + dir * 0.1));
+    localStorage.setItem('re_fontsize', fontSize);
+    document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+    buildPages();
+  }
+
+  // ── Pagination engine ──
+  let pages       = [];
+  let currentPage = 0;
+
+  function buildPages() {
+    const pool    = document.getElementById('para-pool');
+    const area    = document.getElementById('text-area');
+    const content = document.getElementById('page-content');
+    const paras   = Array.from(pool.children);
+    const areaH   = area.clientHeight;
+
+    pages = [];
+    let currentGroup = [];
+
+    const testDiv = document.createElement('div');
+    testDiv.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      visibility: hidden;
+      pointer-events: none;
+      width: ${content.clientWidth}px;
+      font-size: ${fontSize}rem;
+      line-height: 1.85;
+      font-family: 'EB Garamond', Georgia, serif;
+      padding: 0;
+      margin: 0;
+    `;
+    area.appendChild(testDiv);
+
+    const threshold = areaH * 0.82;
+
+    for (const para of paras) {
+      currentGroup.push(para);
+      testDiv.innerHTML = currentGroup.map(p => p.outerHTML).join('');
+
+      if (testDiv.offsetHeight > threshold && currentGroup.length > 1) {
+        currentGroup.pop();
+        pages.push([...currentGroup]);
+        currentGroup = [para];
+        testDiv.innerHTML = para.outerHTML;
+      }
+    }
+
+    if (currentGroup.length) pages.push([...currentGroup]);
+    area.removeChild(testDiv);
+
+    if (currentPage >= pages.length) currentPage = pages.length - 1;
+    renderPage();
+  }
+
+  function renderPage() {
+    const content = document.getElementById('page-content');
+    content.style.animation = 'none';
+    content.offsetHeight;
+    content.style.animation = '';
+    content.innerHTML = pages[currentPage]
+      ? pages[currentPage].map(p => p.outerHTML).join('')
+      : '';
+
+    document.getElementById('page-indicator').textContent =
+      `Page ${currentPage + 1} of ${pages.length}`;
+    document.getElementById('prev-btn').disabled = currentPage === 0;
+    document.getElementById('next-btn').disabled = currentPage === pages.length - 1;
+  }
+
+  function nextPage() {
+    if (currentPage < pages.length - 1) { currentPage++; renderPage(); }
+  }
+
+  function prevPage() {
+    if (currentPage > 0) { currentPage--; renderPage(); }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextPage();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevPage();
+  });
+
+  document.getElementById('tap-next').addEventListener('click', nextPage);
+  document.getElementById('tap-prev').addEventListener('click', prevPage);
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(buildPages, 200);
+  });
+
+  window.addEventListener('load', buildPages);
+
+  // ── Starfield ──
+  const canvas = document.getElementById('stars');
+  const ctx    = canvas.getContext('2d');
+  let W, H, stars = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function initStars(n = 180) {
+    stars = Array.from({ length: n }, () => ({
+      x:  Math.random() * W,
+      y:  Math.random() * H,
+      r:  Math.random() * 1.1 + 0.2,
+      a:  Math.random(),
+      da: (Math.random() - 0.5) * 0.003
+    }));
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      s.a += s.da;
+      if (s.a < 0.05 || s.a > 1) s.da *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(245,236,215,${s.a.toFixed(2)})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(drawStars);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize(); initStars(); drawStars();
+</script>
+</body>
+</html>
