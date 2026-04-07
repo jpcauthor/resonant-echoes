@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Resonant Echoes — Chapter 4</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:     #c9973a;
+      --gold-dim: #8a6422;
+    }
+
+    body {
+      --bg:       #f5ecd7;
+      --bg-2:     #ede0c4;
+      --text:     #2a1f0a;
+      --text-sub: #5a3e1b;
+      --rule:     #8a6422;
+      background: var(--bg);
+      font-family: 'EB Garamond', Georgia, serif;
+      color: var(--text);
+      transition: background 0.4s, color 0.4s;
+      overflow: hidden;
+    }
+
+    body.dark {
+      --bg:       #1a1208;
+      --bg-2:     #241a0c;
+      --text:     #f5ecd7;
+      --text-sub: #c9973a;
+      --rule:     #8a6422;
+    }
+
+    /* starfield */
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.6s;
+    }
+    body.dark #stars { opacity: 1; }
+
+    /* ── Page container ── */
+    .reader {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100dvh;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ── Chapter header ── */
+    .chapter-header {
+      padding: 2rem 0 1.2rem;
+      text-align: center;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(138,100,34,0.2);
+    }
+
+    .chapter-label {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.58rem, 1.5vw, 0.7rem);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+    }
+
+    .chapter-title {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      color: var(--gold);
+      margin-top: 0.3rem;
+      line-height: 1.3;
+    }
+
+    .chapter-sub {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.55rem, 1.3vw, 0.65rem);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      margin-top: 0.4rem;
+      opacity: 0.7;
+    }
+
+    /* ── Text area ── */
+    .text-area {
+      overflow: hidden;
+      position: relative;
+      padding: 1.5rem 0;
+    }
+
+    #para-pool { display: none; }
+
+    #page-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      animation: pageFade 0.4s ease;
+    }
+
+    @keyframes pageFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #page-content p {
+      font-size: var(--font-size, 1.15rem);
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 1em;
+    }
+
+    #page-content p:last-child { margin-bottom: 0; }
+
+    #page-content p.entry-head {
+      font-family: 'Cinzel', serif;
+      font-size: calc(var(--font-size, 1.15rem) * 0.72);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      font-style: normal;
+      margin-bottom: 1.4em;
+      line-height: 1.6;
+    }
+
+    #page-content p.marginalia {
+      border-left: 2px solid var(--gold-dim);
+      padding-left: 1rem;
+      font-style: italic;
+      color: var(--text-sub);
+      margin-top: 0.5em;
+    }
+
+    #page-content p.scene-break {
+      text-align: center;
+      color: var(--gold-dim);
+      font-style: normal;
+      letter-spacing: 0.5em;
+      margin: 0.5em 0;
+    }
+
+    /* ── Bottom nav ── */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 0 1.2rem;
+      border-top: 1px solid rgba(138,100,34,0.2);
+      gap: 1rem;
+      background: var(--bg);
+    }
+
+    .nav-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover:not(:disabled) { color: var(--gold); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.25; cursor: default; }
+
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      flex: 1;
+    }
+
+    .page-indicator {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      opacity: 0.7;
+    }
+
+    .font-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .font-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      cursor: pointer;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      transition: color 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .font-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .theme-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      padding: 0.4rem 0.7rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .theme-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .toc-link {
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      text-decoration: none;
+      opacity: 0.6;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    .toc-link:hover { opacity: 1; color: var(--gold); }
+
+    /* tap zones for mobile */
+    .tap-prev, .tap-next {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      z-index: 50;
+      cursor: pointer;
+      opacity: 0;
+    }
+    .tap-prev { left: 0; }
+    .tap-next { right: 0; }
+  </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<div id="para-pool">
+
+  <p class="entry-head">Watcher's Observation — Entry: 0011 — An Unbearable Situation</p>
+
+  <p>I trust politicians about as much as I trust Resonant Weather Speakers.</p>
+
+  <p>They try to predict the weather.</p>
+
+  <p>Warm.</p>
+
+  <p>Cold.</p>
+
+  <p>Rainy.</p>
+
+  <p>Snowy.</p>
+
+  <p>So much so they've been caught enough that even Shadowmancers call them charlatans.</p>
+
+  <p>The pained reality is somewhat an obfuscated one between those who spin the narrative and those who live through the results of the teetering and askew reality of the moment.</p>
+
+  <p>Politicians like to seem important and feel important.</p>
+
+  <p>It's the ones who eschew these tenets of leadership that scare me the most.</p>
+
+  <p>Elurien Vael'Astra did not get into politics for the power. She strode through the halls of politics to tear down the machinations of the politicians, and the reality was somewhat scary.</p>
+
+  <p>She was successful.</p>
+
+  <p>Then again, having a Shadow Hunter at one's beck and call? That didn't hurt either.</p>
+
+  <p class="marginalia">Sune, the moment she strode in, had a look of disgust on her face—and it had me wondering, was she the kind that simply didn't like commoners? I'm either going to prove to be prophetic, or antagonizingly arrogant. Or then, mayhap both.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p>She peered over her shoulder. She hoped her annoyance, or sense of it, was plastered visibly for everyone to see. She walked with Greighton, who still held onto Sune's hand, and she could feel the undulating rhythm of the Shadow Hunter's Resonance.</p>
+
+  <p>She was used to getting a wide berth—even in the Coppice—save for a few of the old Guard who hero-worshipped her mother to the point of treating her as if she were the Indomitable.</p>
+
+  <p>She had a fleeting worry that the Sovereign Elite at the entrance would forbid her entry, but instead, it was astonishingly the opposite.</p>
+
+  <p>The man wearing the stripes of a Sergeant nodded his winged helm in greeting, keen blue eyes meeting hers, and a voice filled with respect greeted her.</p>
+
+  <p>"Commander, welcome," he said with a sharp nod, stepping aside to allow her entrance into the Council Chamber.</p>
+
+  <p>A few hurried steps brought her to stand to Grey's right side, his left flanked by Sune.</p>
+
+  <p>"Why are they so…" she began.</p>
+
+  <p>"Respectful of you?" he interrupted.</p>
+
+  <p>Damn him. He did that—finishing her sentences—all the time, but part of her found peace and amusement in it.</p>
+
+  <p>Reluctantly, she confirmed his question with a curt grunt in the affirmative.</p>
+
+  <p>"Because your mother holds no sway here, Ranessa. The Cradle knows the value, weight, and measure of your mother," he said while drawing out a chair at a large marble table before the raised council dais.</p>
+
+  <p>She was about to say something, but he then pulled a seat out for her. She couldn't help the blush that rose up along her neck when she looked up and found his eyes already on her.</p>
+
+  <p>But that lived-in moment went away as Grey's eyes turned serious.</p>
+
+  <p>"We do not, nor have we ever, requested the Coppice to send an expeditionary excursion to the North. We are friendly to the Thálmen. Why would we? They'll provide us what we need, at no cost to them, nor us."</p>
+
+  <p>"Oh," the Druid said as she felt herself fall into the seat more than gracefully take her place at the table.</p>
+
+  <p>Sune's smile caught her attention, as if to say the most simple of things that meant one of the greatest things to Ranessa.</p>
+
+  <p>In response to that "Oh," the mysterious woman with keenly bright prismatic eyes nodded, as if to simply say, "I get it."</p>
+
+  <p>And perhaps she did, but Grey wasn't done talking as he drew out his own seat, right in the middle of the two, coming to rest his forearms on the table.</p>
+
+  <p>"We all know about the ambush, and how you saved more than you lost, Ranessa," she saw that his eyes remained on the empty dais, but he kept speaking, "and that? It has earned you, at least here, a whispered place of honor."</p>
+
+  <p>She wanted to say "Oh" again, but she kept her composure, and drew strength from something she'd not received from an outsider—ever.</p>
+
+  <p>Affirmation.</p>
+
+  <p>"Why are we here, Greighton?" Sune asked.</p>
+
+  <p>"Grey," he said too quickly.</p>
+
+  <p>Why did he want to leave that name somewhere that wasn't in the present? She pursed her lips in thought while her brows furrowed.</p>
+
+  <p>"Grey…" Sune corrected—with almost a petulant resignation.</p>
+
+  <p>"I am petitioning the Cradle's Council to excuse me from my position as Shadow Hunter."</p>
+
+  <p>"Oh," that familiar answer Sune would give when she didn't know what to say, was whispered.</p>
+
+  <p>"Why?" Ranessa pressed. "Why not just go your own way? Their rules be damned."</p>
+
+  <p>His laugh was warm, and it made her react in the most unexpected of ways. She smiled.</p>
+
+  <p>"Because, if I can have The Cradle as a friend, and not another governmental institution that would rather see me buried," he leaned back into the chair, "then I would call that a small victory before my," he then looked to her and then to Sune, and then back to her, "our," he corrected, "war begins."</p>
+
+  <p>"War?" she asked in unison with a wide-eyed Sune.</p>
+
+  <p>She was about to press that issue, but then caught the look on Sune's face. It was a— no. She was too gentle to— Ranessa stopped. Everyone thought her mother was the perfect Coppice caretaker, but that opinion only seemed to exist in the Coppice.</p>
+
+  <p>"Sune…" Ranessa hissed in an attempt to get her attention.</p>
+
+  <p>The strawberry-blond hair, now clean and flowing, fanned out as her head snapped in Ranessa's direction, her face still contorted in disgust.</p>
+
+  <p>"What?" she replied too loudly.</p>
+
+  <p>The sigh in response was too loud, and there sat Grey between them both with a bemused smile, but then he wrinkled his nose as well, until the smell finally hit Ranessa.</p>
+
+  <p>Something smelled wrong—off.</p>
+
+  <p>Leaning back into her seat, Ranessa then bowed her head in quiet understanding.</p>
+
+  <p>The commoners from the outer villages were shuffling in and filling the gallery.</p>
+
+  <p>"Odd," Ranessa muttered.</p>
+
+  <p>"Why?" Sune asked—again too loud.</p>
+
+  <p>"Shhhh," Ranessa chastised her gently. "And the only time they ever open the galleries is when there could be a decision that impacts the entirety of The Cradle," the druid paused. "Not sure…"</p>
+
+  <p>"It will," Grey interrupted her—and this was becoming more than anything but the norm now.</p>
+
+  <p>"How so?" a demand from Sune.</p>
+
+  <p>"He explained it earlier," Ranessa began, trying to sound more like a big sister than an irritated one. "He's the Shadow Hunter, and he's going to request to be released from his duties."</p>
+
+  <p>"Oh, yeah, I remember," Sune responded with a chastised expression on her face.</p>
+
+  <p>"See," Ranessa grinned, "you're remembering things," she said in a deadpan voice.</p>
+
+  <p>Cocking her head to the side, Sune looked at Ranessa with a blank expression that held for a flickering moment. It was broken by her quiet giggles and big smile, but no words needed to be said.</p>
+
+  <p>"Smooth," Grey whispered with a grin.</p>
+
+  <p>"That doesn't—" Sune's voice spoke out—as loud as ever—causing Ranessa to wince in embarrassment, "why it smells so bad?"</p>
+
+  <p>She was about to shush her yet again as Grey's face contorted in silence, trying to stop from laughing.</p>
+
+  <p>Damn him. He was not helping.</p>
+
+  <p>From behind her, she heard the Herald's voice.</p>
+
+  <p>"Attention!"</p>
+
+  <p>"The Council shall be seated. Those at the Table of Inquisition, and those seated in the Gallery, shall remain silent. Disruption will result in removal by the Sovereign Guard."</p>
+
+  <p>Ranessa's attention shifted as the Councilor Prime, Elurien Vael'Astra, took to the dais. Her robes billowed—without any discernible breeze in the chamber.</p>
+
+  <p>Show-off, Ranessa thought.</p>
+
+  <p>Vael'Astra called the session to order, her voice ringing with formality. It felt more like an archaic ritual than anything with purpose, but Ranessa rose when expected… and sat again as the motion passed.</p>
+
+  <p>"Councilor Draveth, would you please announce the agenda?" Vael'Astra stepped back and settled into the central seat—the one with the highest back, adorned with two crossed swords and an open book engraved at the top.</p>
+
+  <p>"My thanks, Councilor Prime," the man replied with that inexplicable perfection to his tone that all high elven Aelarii seemed to possess in grotesque abundance.</p>
+
+  <p>"We are here for a singular agenda item," the man spoke—sounding bored but yet managing to make his announcement paint him the light of curiosity.</p>
+
+  <p>"Something smells bad," Sune said—fortunately, this time quieter, but Ranessa cut her a look that simply said, 'Shut up!'</p>
+
+  <p>Sune huffed, folding her arms petulantly across her abdomen.</p>
+
+  <p>What was on the agenda? Ranessa had missed it—partly because of Sune's declaration… mostly because she wasn't wrong. It smelled worse than the animal pens back at the Coppice.</p>
+
+  <p>"…is there a motion for the first item?" Councilor Draveth asked—but his eyes had already found her again, boring into her, past her and through her as if she were an annoying gnat that needed to be squashed.</p>
+
+  <p>"I motion that the Shadow-Hunter explain," came a voice like stone ground against stone.</p>
+
+  <p>Breccan Durnhold. Stout. Dour. His tone was more irritation and angst than diplomacy.</p>
+
+  <p>"Explain why he would so brazenly leave the Cradle," Breccan continued, "when we stand on the precipice of war with the Crimson Citadel and the Forge."</p>
+
+  <p>"I do not think—" A voice rose in protest, but Ranessa couldn't track the source.</p>
+
+  <p>It was cut off.</p>
+
+  <p>"I second the initiation for explanation," another councilor said. And he?</p>
+
+  <p>He was more than beautiful—he was unnervingly perfect.</p>
+
+  <p>Bright eyes. Immaculate hair. Robes askew just enough to look effortlessly poetic. A Songweaver—clearly. And clearly accustomed to being noticed.</p>
+
+  <p>It was, of course it was, Niven Kael. He stood atop the dais like it had been built for his posture.</p>
+
+  <p>"Thus seconded," Draveth said, still sounding like he'd rather be reading alone in a different century. "Shadow-Hunter, explain your reasoning."</p>
+
+  <p>As Grey rose, silence fell.</p>
+
+  <p>Other than the unnervingly distasteful scent of manure—clinging, perhaps, to someone's boots—there were no distractions.</p>
+
+  <p>"Council of the Cradle," Grey began, his voice steady but heavy. "The reason I must vacate my position is…"</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p class="entry-head">Watcher's Observation — Entry: 0012 — A Glimpse into Something…</p>
+
+  <p>The more time I observe Ranessa, the more I grow profoundly afraid and fond of her. It's amusing that those words are so diametrically opposed but intrinsically related.</p>
+
+  <p>Sune is an enigma, but I question whether or not I wish to try to solve her prior to history's reveal, or something else. I am unburdened with the rare treat of uncertainty—and welcome it eagerly to this moment. Emotions are fleeting, mine even more so.</p>
+
+  <p>She deserves as much.</p>
+
+  <p>Greighton.</p>
+
+  <p>He deserves much. This is true.</p>
+
+  <p>I know the truth that he's about to impart, so I will simply remain silent. This has been catalogued, studied, and dismissed all within a lifetime, a heartbeat, or a simple breath of air—sometimes, all three in the same moment—just ask Grevon, if given the luxury of that opportunity.</p>
+
+  <p class="marginalia">Pity is the word that claws at the surface, but I refuse to use it. Greighton is a smart man, a brilliant man, and desperate. Therefore, compassionate restraint will replace pity, and I thus shall wait to see what he does. I have said, and I still remain… invested.</p>
+
+</div>
+
+<!-- Mobile tap zones -->
+<div class="tap-prev" id="tap-prev"></div>
+<div class="tap-next" id="tap-next"></div>
+
+<div class="reader">
+
+  <div class="chapter-header">
+    <p class="chapter-label">Chapter IV</p>
+    <p class="chapter-title">Revelations, Threats, and a Nap</p>
+    <p class="chapter-sub">Resonant Echoes</p>
+  </div>
+
+  <div class="text-area" id="text-area">
+    <div id="page-content"></div>
+  </div>
+
+  <nav class="nav-bar">
+    <button class="nav-btn" id="prev-btn" onclick="prevPage()" disabled>&#8592; Prev</button>
+
+    <div class="nav-center">
+      <span class="page-indicator" id="page-indicator">Page 1</span>
+      <div class="font-controls">
+        <button class="font-btn" onclick="adjustFont(-1)" title="Smaller">A&#8331;</button>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">&#9790; Dark</button>
+        <button class="font-btn" onclick="adjustFont(1)"  title="Larger">A&#8314;</button>
+      </div>
+      <a class="toc-link" href="toc.html">&#8617; Contents</a>
+    </div>
+
+    <button class="nav-btn" id="next-btn" onclick="nextPage()">Next &#8594;</button>
+  </nav>
+
+</div>
+
+<script>
+  // ── Token guard ──
+  (function() {
+    const token = sessionStorage.getItem('re_token');
+    if (!token) {
+      window.location.href = 'https://jpcauthor.github.io/resonant-echoes/login.html';
+    }
+  })();
+
+  // ── Theme ──
+  const body     = document.body;
+  const themeBtn = document.getElementById('theme-btn');
+  const saved    = localStorage.getItem('re_theme') || 'dark';
+
+  if (saved === 'dark') { body.classList.add('dark'); themeBtn.textContent = '☀ Light'; }
+  else { themeBtn.textContent = '☽ Dark'; }
+
+  function toggleTheme() {
+    const isDark = body.classList.toggle('dark');
+    themeBtn.textContent = isDark ? '☀ Light' : '☽ Dark';
+    localStorage.setItem('re_theme', isDark ? 'dark' : 'light');
+    buildPages();
+  }
+
+  // ── Font size ──
+  let fontSize = parseFloat(localStorage.getItem('re_fontsize') || '1.15');
+  document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+
+  function adjustFont(dir) {
+    fontSize = Math.min(1.6, Math.max(0.9, fontSize + dir * 0.1));
+    localStorage.setItem('re_fontsize', fontSize);
+    document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+    buildPages();
+  }
+
+  // ── Pagination engine ──
+  let pages       = [];
+  let currentPage = 0;
+
+  function buildPages() {
+    const pool    = document.getElementById('para-pool');
+    const area    = document.getElementById('text-area');
+    const content = document.getElementById('page-content');
+    const paras   = Array.from(pool.children);
+    const areaH   = area.clientHeight;
+
+    pages = [];
+    let currentGroup = [];
+
+    const testDiv = document.createElement('div');
+    testDiv.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      visibility: hidden;
+      pointer-events: none;
+      width: ${content.clientWidth}px;
+      font-size: ${fontSize}rem;
+      line-height: 1.85;
+      font-family: 'EB Garamond', Georgia, serif;
+      padding: 0;
+      margin: 0;
+    `;
+    area.appendChild(testDiv);
+
+    const threshold = areaH * 0.82;
+
+    for (const para of paras) {
+      currentGroup.push(para);
+      testDiv.innerHTML = currentGroup.map(p => p.outerHTML).join('');
+
+      if (testDiv.offsetHeight > threshold && currentGroup.length > 1) {
+        currentGroup.pop();
+        pages.push([...currentGroup]);
+        currentGroup = [para];
+        testDiv.innerHTML = para.outerHTML;
+      }
+    }
+
+    if (currentGroup.length) pages.push([...currentGroup]);
+    area.removeChild(testDiv);
+
+    if (currentPage >= pages.length) currentPage = pages.length - 1;
+    renderPage();
+  }
+
+  function renderPage() {
+    const content = document.getElementById('page-content');
+    content.style.animation = 'none';
+    content.offsetHeight;
+    content.style.animation = '';
+    content.innerHTML = pages[currentPage]
+      ? pages[currentPage].map(p => p.outerHTML).join('')
+      : '';
+
+    document.getElementById('page-indicator').textContent =
+      `Page ${currentPage + 1} of ${pages.length}`;
+    document.getElementById('prev-btn').disabled = currentPage === 0;
+    document.getElementById('next-btn').disabled = currentPage === pages.length - 1;
+  }
+
+  function nextPage() {
+    if (currentPage < pages.length - 1) { currentPage++; renderPage(); }
+  }
+
+  function prevPage() {
+    if (currentPage > 0) { currentPage--; renderPage(); }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextPage();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevPage();
+  });
+
+  document.getElementById('tap-next').addEventListener('click', nextPage);
+  document.getElementById('tap-prev').addEventListener('click', prevPage);
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(buildPages, 200);
+  });
+
+  window.addEventListener('load', buildPages);
+
+  // ── Starfield ──
+  const canvas = document.getElementById('stars');
+  const ctx    = canvas.getContext('2d');
+  let W, H, stars = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function initStars(n = 180) {
+    stars = Array.from({ length: n }, () => ({
+      x:  Math.random() * W,
+      y:  Math.random() * H,
+      r:  Math.random() * 1.1 + 0.2,
+      a:  Math.random(),
+      da: (Math.random() - 0.5) * 0.003
+    }));
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      s.a += s.da;
+      if (s.a < 0.05 || s.a > 1) s.da *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(245,236,215,${s.a.toFixed(2)})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(drawStars);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize(); initStars(); drawStars();
+</script>
+</body>
+</html>
