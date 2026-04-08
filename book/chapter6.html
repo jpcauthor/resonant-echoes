@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Resonant Echoes — Chapter 6</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:     #c9973a;
+      --gold-dim: #8a6422;
+    }
+
+    body {
+      --bg:       #f5ecd7;
+      --bg-2:     #ede0c4;
+      --text:     #2a1f0a;
+      --text-sub: #5a3e1b;
+      --rule:     #8a6422;
+      background: var(--bg);
+      font-family: 'EB Garamond', Georgia, serif;
+      color: var(--text);
+      transition: background 0.4s, color 0.4s;
+      overflow: hidden;
+    }
+
+    body.dark {
+      --bg:       #1a1208;
+      --bg-2:     #241a0c;
+      --text:     #f5ecd7;
+      --text-sub: #c9973a;
+      --rule:     #8a6422;
+    }
+
+    /* starfield */
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.6s;
+    }
+    body.dark #stars { opacity: 1; }
+
+    /* ── Page container ── */
+    .reader {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100dvh;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ── Chapter header ── */
+    .chapter-header {
+      padding: 2rem 0 1.2rem;
+      text-align: center;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(138,100,34,0.2);
+    }
+
+    .chapter-label {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.58rem, 1.5vw, 0.7rem);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+    }
+
+    .chapter-title {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      color: var(--gold);
+      margin-top: 0.3rem;
+      line-height: 1.3;
+    }
+
+    .chapter-sub {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.55rem, 1.3vw, 0.65rem);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      margin-top: 0.4rem;
+      opacity: 0.7;
+    }
+
+    /* ── Text area ── */
+    .text-area {
+      overflow: hidden;
+      position: relative;
+      padding: 1.5rem 0;
+    }
+
+    #para-pool { display: none; }
+
+    #page-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      animation: pageFade 0.4s ease;
+    }
+
+    @keyframes pageFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #page-content p {
+      font-size: var(--font-size, 1.15rem);
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 1em;
+    }
+
+    #page-content p:last-child { margin-bottom: 0; }
+
+    #page-content p.entry-head {
+      font-family: 'Cinzel', serif;
+      font-size: calc(var(--font-size, 1.15rem) * 0.72);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      font-style: normal;
+      margin-bottom: 1.4em;
+      line-height: 1.6;
+    }
+
+    #page-content p.marginalia {
+      border-left: 2px solid var(--gold-dim);
+      padding-left: 1rem;
+      font-style: italic;
+      color: var(--text-sub);
+      margin-top: 0.5em;
+    }
+
+    #page-content p.scene-break {
+      text-align: center;
+      color: var(--gold-dim);
+      font-style: normal;
+      letter-spacing: 0.5em;
+      margin: 0.5em 0;
+    }
+
+    /* ── Bottom nav ── */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 0 1.2rem;
+      border-top: 1px solid rgba(138,100,34,0.2);
+      gap: 1rem;
+      background: var(--bg);
+    }
+
+    .nav-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover:not(:disabled) { color: var(--gold); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.25; cursor: default; }
+
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      flex: 1;
+    }
+
+    .page-indicator {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      opacity: 0.7;
+    }
+
+    .font-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .font-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      cursor: pointer;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      transition: color 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .font-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .theme-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      padding: 0.4rem 0.7rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .theme-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .toc-link {
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      text-decoration: none;
+      opacity: 0.6;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    .toc-link:hover { opacity: 1; color: var(--gold); }
+
+    /* tap zones for mobile */
+    .tap-prev, .tap-next {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      z-index: 50;
+      cursor: pointer;
+      opacity: 0;
+    }
+    .tap-prev { left: 0; }
+    .tap-next { right: 0; }
+  </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<div id="para-pool">
+
+  <p class="entry-head">Watcher's Observation — Entry: 0015 — Something Rotten in the Council Chambers</p>
+
+  <p>Sune was right. Quite literally and unequivocally right. There was a foul stench in the air, and it was not manure or the scent of hardworking people coming in from the plowfields.</p>
+
+  <p>No, it was Jadsia—again. What Greighton saw in her to allow her into the Vanguard initially... well. Let me pause here.</p>
+
+  <p>He saw a woman of undeniable beauty and shape, with a fawning attitude that showered him with much-needed intimacy. But for all the man's training, he was not trained to see through emotional manipulation.</p>
+
+  <p>It was that boyhood, babe-in-the-woods part of Greighton that led him to trust no one intimately—and it also led to his greatest failure: Jadsia.</p>
+
+  <p>Thus evidenced by her presence, and the sudden swarming of undead minions who held together their faux-human forms just long enough to spring the surprise.</p>
+
+  <p class="marginalia">I feel awkward using the term "spring the surprise," but Jadsia was not a tactician in the militaristic sense. She was a manipulator of the most comprehensive evil imaginable—the corruption of a man's desire for love, companionship, and need. I would lay down my favorite quill as collateral on a wager that each of the thirty or so people in that chamber thought they had found something in Jadsia. Purpose.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p>Ranessa had always been one to react quickly. She was—oftentimes—proud of her reactive thinking, her tactical prowess in narrow decision windows, but something about this had unnerved her to the point of inaction.</p>
+
+  <p>The sloughing skin—a meat-suit, if one insisted—left Ranessa nauseous, taken aback by the corrosive evil she was witnessing.</p>
+
+  <p>Never before had she been so inundated with visceral detest that it froze her entirely—her ability to act decisively locked in place, and above all, her instinct to move reduced to an impotent moment of real embarrassment.</p>
+
+  <p>In horror, she watched the skin melt in a grotesque display of abusive power.</p>
+
+  <p>Because that skin—sloughing away to reveal coalescing shadows—had belonged to a woman. Someone who had lived. And now? Where was she? Dead—of course—at the Shadowmancer's hands.</p>
+
+  <p>That should have been enough to launch the druid into action. Instead, it rooted her in place. Even as Greighton hurled his swords and vaulted across the table as if this were nothing more than a day at some children's playground in the Coppice.</p>
+
+  <p>Trapped in that frozen stasis, she watched—almost impressed—by his agility and strength as the shadows he dove for spun, twisted, and climbed toward the ceiling, evading a strike of Ignis that would have disintegrated any other target.</p>
+
+  <p>But his momentum would falter. Retrieving the swords he had buried into the wall would not come easily. The Sovereign Elite were already engaged—woefully outnumbered—facing the hollow, glowing green eyes of the undead, animated by death's own perversion of Vitae: entropy.</p>
+
+  <p>They fought with a valor Ranessa could not only recognize, but respect on that deep, instinctive level of a warrior.</p>
+
+  <p>And what does that make you?</p>
+
+  <p>The thought came as a low, venomous growl from the pit of her stomach. Sitting. Watching. Observing—while the Shadow Hunter wasted no time in acting.</p>
+
+  <p>The chair to her left scraped, then toppled, clattering to the ground as Sune fell from it the moment the shadows congealed—grotesque, writhing—and left, in their undulating wake, Jadsia's perfect smile.</p>
+
+  <p>Her eyes glowed green as she looked past—or through—Ranessa, toward the scurrying Sune, just barely visible at the edge of the druid's periphery.</p>
+
+  <p>"Mmmm, fear tastes sweet." Her tongue slid in a measured glide across black-painted lips. "It has an aroma," Jadsia declared, her gaze locking with Ranessa's.</p>
+
+  <p>"The great druid, cowered by my pets." Jadsia gestured with a grandeur better suited to novelists and chroniclers—like the stories Ranessa had read as a child, of druidic heroes long since gone.</p>
+
+  <p>Ranessa tried to move—but now she felt it. Her weakness. Her cowardice. It coiled within the seductive sway of Jadsia, who reveled in the clash of steel, the screams of pain—and then she laughed.</p>
+
+  <p>The body of a Sovereign Elite flew past and landed with a sickening thud at Ranessa's feet. A heartbeat later, almost comically, the severed head rolled after it, coming to rest beside its lifeless torso.</p>
+
+  <p>"You see," Jadsia said, her smile curling as she pointed toward the cowering Sune, now pressed against the base of a pillar, "it's all futile. Sin. Debauchery. It is the undercurrent of everyone's Song." She took a step closer. "And how delicious our little woman here will taste when she is—"</p>
+
+  <p><em>Free yourself.</em></p>
+
+  <p>The growl echoed in Ranessa's mind—the same voice she had buried for years, ignoring its rising rage, the fire she had been too afraid to release.</p>
+
+  <p>Feed the rage. Let it burn your enemies—but let it save your friends.</p>
+
+  <p>Feed the rage? she questioned, still immobilized in her seat, the heavy stone table the only thing separating her from Jadsia.</p>
+
+  <p>Let it free—but consume it. Do not let it consume you. Free it. Free yourself.</p>
+
+  <p>The voice paused. The growl—the roaring presence—fell silent.</p>
+
+  <p><em>Free me, my little rose.</em></p>
+
+  <p>The name struck something deep. Familiar. Dangerous. It fed the fire building in her chest—the voice now unmistakable. For years it had been silenced, gagged, cast into an emotional oblivion meant to drown it in forgetfulness.</p>
+
+  <p><em>Embrace the rage. Control it.</em></p>
+
+  <p>Her father's voice—pleading—shattered more than emotional shackles.</p>
+
+  <p>It came with a roar that split the stone table in half—a sharp, cracking report, the unmistakable sound of stone giving way beneath force it was never meant to endure.</p>
+
+  <p>And then, before her own eyes, she saw something that both frightened and empowered her.</p>
+
+  <p>In her mind, the act of moving—of reaching, of grasping—made sense.</p>
+
+  <p>This was different.</p>
+
+  <p>What Ranessa witnessed was a clawed hand seizing one of the broken halves of the table. Steeled talons dug into stone as she drew it back—and then hurled it without thought, without hesitation.</p>
+
+  <p>"LEAVE HER ALONE!" Ranessa roared—not screamed, roared—her voice shaking the chamber, halting the clash of steel and shadow for a single, suspended moment.</p>
+
+  <p>Power surged through her. Her chest heaved as bestial snarls tore free, her footsteps thundering as she drove toward Jadsia—who dissolved into smoke and fled, fear finally cracking that perfect composure.</p>
+
+  <p>"You're right!" Ranessa roared. "The smell of fear is sweet!"</p>
+
+  <p>And the voice came again—changed now. Lighter. Softer. Almost at peace.</p>
+
+  <p><em>Thank you</em>, it whispered, relieved. <em>My daughter… may your rage be the bringer of peace to these lands.</em></p>
+
+  <p>The echo lingered, fading, yet hollow now.</p>
+
+  <p><em>My love—and the blessings of the Song… be with you.</em></p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p class="entry-head">Watcher's Observation — Entry: 0016 — Fate Has Taken the Afternoon Off</p>
+
+  <p>I knew Ranessa was strong. Her mastery of Terra was legendary among druids throughout Rivendawn—not just the Cradle.</p>
+
+  <p>She, however, chose to remain blissfully ignorant of what others thought. I know this because she had verbalized it many times—most notably to her mother.</p>
+
+  <p>And it pains me to admit that her mother was right. Though, if Ranessa has her way, she may yet disembowel the woman before conceding the point. Not that such a fate would be entirely inappropriate, given the horrendous work of raising her daughter to be a weapon instead of a druid—or a person, for that matter.</p>
+
+  <p>Ranessa was an Ursa—the pinnacle of druidic strength. And by her actions, unlike the others—four or five, I believe—she was in absolute control of herself and her faculties.</p>
+
+  <p>So much so that it was rather entertaining to watch half of a broken granite table go hurtling toward Jadsia—which, I should note, was richly deserved.</p>
+
+  <p class="marginalia">Ranessa Barkroot is an Ursa—something long thought lost, and something her mother will undoubtedly try to exploit. Good luck to her on that. I cannot stop chuckling at the thought of that particular conversation. And congratulations to Greighton: your new friend is one of the most powerful individuals in Rivendawn—and you blind fool, I think she likes you.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p>When the table tore through the air as if it weighed nothing—no more than splintered kindling—Sune wanted to scream. The sound died in her throat, strangled by what followed, forcing a sharp, steadying breath instead.</p>
+
+  <p>Jadsia was gone. In her place, thick black shadows coiled and writhed, fleeing upward in oily tendrils that clung to the ceiling.</p>
+
+  <p>And then the rampage began in earnest.</p>
+
+  <p>Ranessa—or what wore her shape—seized the other half of the shattered table, fingers—no, claws—biting into the stone. With a violent heave, she hurled it into a cluster of Jadsia's pets as they closed in on two unlucky Sovereign Guards.</p>
+
+  <p>The result?</p>
+
+  <p>Crushed humanoid forms, split and broken, oozing black and green ichor beneath the slab of stone that had come down on them with brutal finality.</p>
+
+  <p>The two guardsmen stared at Ranessa, eyes wide—panic settling deep into their gaze as they pressed themselves further into their poorly chosen corner.</p>
+
+  <p>The bear—four, perhaps five meters tall—bellowed, a massive claw snapping forward, pointing at them with unmistakable intent.</p>
+
+  <p>"Fight!" Ranessa's voice—clear as it had been that morning—cut through the chaos, dragging the guards back into the moment.</p>
+
+  <p>And into the fray they went. Whether inspired or simply unwilling to die cowering, they surged forward with renewed vigor, cutting into the sea of undead—shambling, crawling, clawing—each one driven by a ravenous need to consume.</p>
+
+  <p>Those in the gallery who had no part in the plot were the first to fall. Their bodies were torn asunder, flesh stripped, limbs wrenched free and repurposed as crude weapons—until what remained was nothing more than a grotesque parody of a feast, the dead laid out like a butchered spread for the starving horrors that consumed them.</p>
+
+  <p>Then she saw him.</p>
+
+  <p>Greighton had retrieved his swords, and now they were no longer tools—they were instruments of destruction. Along the slightly curved blades, lightning raced from tip to hilt, the arcs undulating in a rhythmic tease of the Song.</p>
+
+  <p>Each movement was precise—more dance than destruction. His body, a specimen of honed athleticism, moved with an agility that made his entire form ripple like silk in the wind.</p>
+
+  <p>He moved—and in the wake of each motion, bodies fell.</p>
+
+  <p>But it was when he vaulted over a stanchion into the crowd that she understood the man she had dreamt of.</p>
+
+  <p>There were survivors in the gallery—children, most notably—cowering in tears behind parents who fought with desperate savagery. They swung whatever they could find, driven by sheer will to protect—but the clawing monstrosities pressed on, relentless. Their strikes slowed. Their arms grew heavy. Desperation carved itself into their faces.</p>
+
+  <p>And then Greighton arrived.</p>
+
+  <p>Not as a man—but as an ending.</p>
+
+  <p>He moved with a placid expression, almost serene, as his blades spun in lethal arcs. Lightning lashed outward with each strike, and where it touched, undead bodies ignited—Ignis consuming them in violent bursts. They burned as though the fire itself rejected them, their forms collapsing into ash as the Resonance devoured what little animation remained.</p>
+
+  <p>What kept Sune distracted more than the lethal dance of Greighton's blades was the gentleness of his next action—the tenderness in his voice. She could feel it, vibrating through the core of the Song.</p>
+
+  <p>The man gave a damn.</p>
+
+  <p>"Go," he said, his voice impossibly gentle. "Through the doors."</p>
+
+  <p>The calm direction was paired with the subtle gesture of his left blade, indicating their path to freedom.</p>
+
+  <p>And she could feel it—sense it—the serenity in his posture, in his voice, as he allowed the Song to become a soothing respite for the wide-eyed survivors.</p>
+
+  <p>They didn't argue. They fled.</p>
+
+  <p>And she saw his shoulders soften—as if some unseen weight had been lifted.</p>
+
+  <p>"You do care…" she said aloud.</p>
+
+  <p>Cackling answered her.</p>
+
+  <p>It came from the rafters.</p>
+
+  <p>There was Jadsia—clinging to the ceiling, her hands twisted into shadowed claws, her feet the same as they dug into the ornate, vaulted stone.</p>
+
+  <p>But what churned Sune's stomach was not the posture.</p>
+
+  <p>It was the back.</p>
+
+  <p>The dress left it bare—and Sune was looking at it.</p>
+
+  <p>And yet, Jadsia's eyes met hers.</p>
+
+  <p>Glowing. Green. Locked.</p>
+
+  <p>Her head had turned—one hundred and eighty degrees—unnaturally, impossibly—while her body remained fixed in place.</p>
+
+  <p>She cackled, the sound splintering through the chamber as her eyes flared brighter—and then came a sickening pop from the floor below, near where the table had once stood.</p>
+
+  <p>When she tried to speak, fear surged through her again—her attention torn between Jadsia above and whatever had made that sound below.</p>
+
+  <p>But the voice won.</p>
+
+  <p>"Of course he cares," Jadsia laughed, green ichor dripping from her mouth. "That's why he'll cry when I kill you!"</p>
+
+  <p>Two things happened less than a halting breath apart.</p>
+
+  <p>The first was the wet sickly sounds eerily echoing from in front of her.</p>
+
+  <p>Sune turned toward the source of the sound—and panic flooded her body all over again. Sharp. Immediate. Suffocating.</p>
+
+  <p>The severed head of the fallen guardsman had changed.</p>
+
+  <p>It had sprouted eight legs—crudely bent, twitching—as it lifted itself from the ground into a grotesque parody of life. The tarsal tips clicked and clacked against the stone, each step leaving small, pitted marks as ichor-slick limbs skittered forward with eager, unnatural energy.</p>
+
+  <p>She wanted to scream. It clawed its way up—past the bile, past the choking fear—ready to rip free—until a mountain crashed down atop the skittering thing.</p>
+
+  <p>Wet impact. Bone giving. Gore spraying.</p>
+
+  <p>Silence—just for a breath.</p>
+
+  <p>A man stood where the creature had been. Kilt. Fur-lined armor. A broad back turned as he glanced over his shoulder at her. The axe strapped across him was formidable—but his eyes…</p>
+
+  <p>Gentle. Apologetic.</p>
+
+  <p>Jadsia shrieked from above. He didn't even look.</p>
+
+  <p>He turned to face Sune fully.</p>
+
+  <p>Boots slick with green gore. Bone fragments clinging. Arms extending—not reaching, not taking—offering.</p>
+
+  <p>He did not move closer.</p>
+
+  <p>He let her choose.</p>
+
+  <p>Sune was unraveling.</p>
+
+  <p>Fear twisting tight in her chest.</p>
+
+  <p>Panic clawing at her ribs.</p>
+
+  <p>But not stupid. Never that.</p>
+
+  <p>She pushed from her position—hard—launching herself forward into him, hands grasping, clinging, needing something solid—something real.</p>
+
+  <p>And there—in his arms—the chaos didn't stop. The screams didn't fade.</p>
+
+  <p>But inside her—something did.</p>
+
+  <p>This mountain of a man cast a shadow of gentility over her roiling emotions, and she slipped into that protection, hiding her head against his chest as she tried to make herself as small as possible.</p>
+
+  <p>Emotions practiced at evasion no longer moved. They surrendered.</p>
+
+  <p>Warmth.</p>
+
+  <p>Protection.</p>
+
+  <p>A fragile, impossible certainty—she wasn't alone.</p>
+
+  <p>She might live.</p>
+
+  <p>Her attention snapped upward.</p>
+
+  <p>"SHE'S MINE!"</p>
+
+  <p>The screech ripped through the chamber, stealing every eye. Even Sune pulled back from the warmth of fur and looked up as Jadsia released her hold on the ceiling.</p>
+
+  <p>She came down like a spear of shadow—sleek, screaming—her face the tip of it. The sound tore at Sune's ears. The man holding her tightened—then folded over her.</p>
+
+  <p>Shielding her.</p>
+
+  <p>The floor trembled—a distant force building—until a familiar roar filled her ears. The man lurched forward slightly, absorbing the impact, and Sune lifted her gaze.</p>
+
+  <p>The prisms of light met their cousin blue.</p>
+
+  <p>His eyes were brilliant. Steady.</p>
+
+  <p>She saw herself reflected there—wide-eyed, shaking—held in calm she did not yet understand.</p>
+
+  <p>He was smiling. He knew something she—and then she knew it too.</p>
+
+  <p>She glanced past the fur at his shoulders.</p>
+
+  <p>Greighton.</p>
+
+  <p>Moving through the chaos—dancing with the shadows, holding them at bay. His lightning-wreathed blades burned through them like daylight, drawing hisses from the darkness as Jadsia's scream twisted into something pained, something breaking.</p>
+
+  <p>And then—smoke.</p>
+
+  <p>She unraveled, her form dissolving, drifting—wounded.</p>
+
+  <p>"No," Sune hissed.</p>
+
+  <p>The man shifted, head canting toward her—gentle, questioning—but the moment shattered.</p>
+
+  <p>"No."</p>
+
+  <p>She tore free of his arms.</p>
+
+  <p>The great bear—nearly four meters tall—skidded to a halt beside her, snout wrinkling as it scented the air, eyes tracking the fleeing smoke above.</p>
+
+  <p>"NO!" Sune screamed.</p>
+
+  <p>The air answered.</p>
+
+  <p>It compressed—tight, suffocating—then detonated upward in a violent surge, a storm unleashed within stone walls. The smoke thinned, stretched, torn apart—until the screaming came.</p>
+
+  <p>Real. Agonized.</p>
+
+  <p>From nearly fifty feet above, Jadsia fell.</p>
+
+  <p>Not shadow. Not smoke.</p>
+
+  <p>Flesh.</p>
+
+  <p>She struck the ground as a woman—whole, naked, stripped of shadow—and did not move.</p>
+
+  <p>"No…"</p>
+
+  <p>Sune's voice broke as she sagged backward, caught once more in the waiting arms of the mountain behind her.</p>
+
+  <p>Blackness crept in at the edges of her vision—closing, narrowing—</p>
+
+  <p>And with the last breath of her strength, a whisper broke free.</p>
+
+  <p>Defiant. Prideful.</p>
+
+  <p>"No."</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p class="entry-head">Watcher's Observation — Entry: 0017 — She Said No</p>
+
+  <p>And no became reality.</p>
+
+  <p>Not through the dominance of another, but through the dominance of her own will.</p>
+
+  <p>When Gunnar's arms opened to Sune, I wondered what she would do. But it was what he did—a simple gesture—that gave her something she had been yearning for. That much was evident.</p>
+
+  <p>Agency.</p>
+
+  <p>And she chose the safety of Gunnar's arms—if only for a moment.</p>
+
+  <p>Until something changed. What it was, what it became, I cannot say—but I know it led to the capture of one of the most wanted Shadowmancers in all of Rivendawn.</p>
+
+  <p>She was detained by the Song—through its Resonance—and by the will of a girl who had begun to write its notes for herself.</p>
+
+  <p>I am no longer intrigued. Nor invested.</p>
+
+  <p>I am a witness.</p>
+
+  <p>And I will continue to do just that.</p>
+
+  <p>Witness.</p>
+
+  <p class="marginalia">Greighton Lastlight. Ranessa Barkroot. Gunnar. Sune. History should be afraid— for it is about to be written in the promise of blood.</p>
+
+</div>
+
+<!-- Mobile tap zones -->
+<div class="tap-prev" id="tap-prev"></div>
+<div class="tap-next" id="tap-next"></div>
+
+<div class="reader">
+
+  <div class="chapter-header">
+    <p class="chapter-label">Chapter VI</p>
+    <p class="chapter-title">A Dance Macabre</p>
+    <p class="chapter-sub">Resonant Echoes</p>
+  </div>
+
+  <div class="text-area" id="text-area">
+    <div id="page-content"></div>
+  </div>
+
+  <nav class="nav-bar">
+    <button class="nav-btn" id="prev-btn" onclick="prevPage()" disabled>&#8592; Prev</button>
+
+    <div class="nav-center">
+      <span class="page-indicator" id="page-indicator">Page 1</span>
+      <div class="font-controls">
+        <button class="font-btn" onclick="adjustFont(-1)" title="Smaller">A&#8331;</button>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">&#9790; Dark</button>
+        <button class="font-btn" onclick="adjustFont(1)"  title="Larger">A&#8314;</button>
+      </div>
+      <a class="toc-link" href="toc.html">&#8617; Contents</a>
+    </div>
+
+    <button class="nav-btn" id="next-btn" onclick="nextPage()">Next &#8594;</button>
+  </nav>
+
+</div>
+
+<script>
+  // ── Token guard ──
+  (function() {
+    const token = sessionStorage.getItem('re_token');
+    if (!token) {
+      window.location.href = 'https://jpcauthor.github.io/resonant-echoes/login.html';
+    }
+  })();
+
+  // ── Theme ──
+  const body     = document.body;
+  const themeBtn = document.getElementById('theme-btn');
+  const saved    = localStorage.getItem('re_theme') || 'dark';
+
+  if (saved === 'dark') { body.classList.add('dark'); themeBtn.textContent = '☀ Light'; }
+  else { themeBtn.textContent = '☽ Dark'; }
+
+  function toggleTheme() {
+    const isDark = body.classList.toggle('dark');
+    themeBtn.textContent = isDark ? '☀ Light' : '☽ Dark';
+    localStorage.setItem('re_theme', isDark ? 'dark' : 'light');
+    buildPages();
+  }
+
+  // ── Font size ──
+  let fontSize = parseFloat(localStorage.getItem('re_fontsize') || '1.15');
+  document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+
+  function adjustFont(dir) {
+    fontSize = Math.min(1.6, Math.max(0.9, fontSize + dir * 0.1));
+    localStorage.setItem('re_fontsize', fontSize);
+    document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+    buildPages();
+  }
+
+  // ── Pagination engine ──
+  let pages       = [];
+  let currentPage = 0;
+
+  function buildPages() {
+    const pool    = document.getElementById('para-pool');
+    const area    = document.getElementById('text-area');
+    const content = document.getElementById('page-content');
+    const paras   = Array.from(pool.children);
+    const areaH   = area.clientHeight;
+
+    pages = [];
+    let currentGroup = [];
+
+    const testDiv = document.createElement('div');
+    testDiv.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      visibility: hidden;
+      pointer-events: none;
+      width: ${content.clientWidth}px;
+      font-size: ${fontSize}rem;
+      line-height: 1.85;
+      font-family: 'EB Garamond', Georgia, serif;
+      padding: 0;
+      margin: 0;
+    `;
+    area.appendChild(testDiv);
+
+    const threshold = areaH * 0.82;
+
+    for (const para of paras) {
+      currentGroup.push(para);
+      testDiv.innerHTML = currentGroup.map(p => p.outerHTML).join('');
+
+      if (testDiv.offsetHeight > threshold && currentGroup.length > 1) {
+        currentGroup.pop();
+        pages.push([...currentGroup]);
+        currentGroup = [para];
+        testDiv.innerHTML = para.outerHTML;
+      }
+    }
+
+    if (currentGroup.length) pages.push([...currentGroup]);
+    area.removeChild(testDiv);
+
+    if (currentPage >= pages.length) currentPage = pages.length - 1;
+    renderPage();
+  }
+
+  function renderPage() {
+    const content = document.getElementById('page-content');
+    content.style.animation = 'none';
+    content.offsetHeight;
+    content.style.animation = '';
+    content.innerHTML = pages[currentPage]
+      ? pages[currentPage].map(p => p.outerHTML).join('')
+      : '';
+
+    document.getElementById('page-indicator').textContent =
+      `Page ${currentPage + 1} of ${pages.length}`;
+    document.getElementById('prev-btn').disabled = currentPage === 0;
+    document.getElementById('next-btn').disabled = currentPage === pages.length - 1;
+  }
+
+  function nextPage() {
+    if (currentPage < pages.length - 1) { currentPage++; renderPage(); }
+  }
+
+  function prevPage() {
+    if (currentPage > 0) { currentPage--; renderPage(); }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextPage();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevPage();
+  });
+
+  document.getElementById('tap-next').addEventListener('click', nextPage);
+  document.getElementById('tap-prev').addEventListener('click', prevPage);
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(buildPages, 200);
+  });
+
+  window.addEventListener('load', buildPages);
+
+  // ── Starfield ──
+  const canvas = document.getElementById('stars');
+  const ctx    = canvas.getContext('2d');
+  let W, H, stars = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function initStars(n = 180) {
+    stars = Array.from({ length: n }, () => ({
+      x:  Math.random() * W,
+      y:  Math.random() * H,
+      r:  Math.random() * 1.1 + 0.2,
+      a:  Math.random(),
+      da: (Math.random() - 0.5) * 0.003
+    }));
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      s.a += s.da;
+      if (s.a < 0.05 || s.a > 1) s.da *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(245,236,215,${s.a.toFixed(2)})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(drawStars);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize(); initStars(); drawStars();
+</script>
+</body>
+</html>
