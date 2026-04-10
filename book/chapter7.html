@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Resonant Echoes — Chapter Seven</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:     #c9973a;
+      --gold-dim: #8a6422;
+    }
+
+    body {
+      --bg:       #f5ecd7;
+      --bg-2:     #ede0c4;
+      --text:     #2a1f0a;
+      --text-sub: #5a3e1b;
+      --rule:     #8a6422;
+      background: var(--bg);
+      font-family: 'EB Garamond', Georgia, serif;
+      color: var(--text);
+      transition: background 0.4s, color 0.4s;
+      overflow: hidden;
+    }
+
+    body.dark {
+      --bg:       #1a1208;
+      --bg-2:     #241a0c;
+      --text:     #f5ecd7;
+      --text-sub: #c9973a;
+      --rule:     #8a6422;
+    }
+
+    /* starfield */
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.6s;
+    }
+    body.dark #stars { opacity: 1; }
+
+    /* ── Page container ── */
+    .reader {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100dvh;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ── Chapter header ── */
+    .chapter-header {
+      padding: 2rem 0 1.2rem;
+      text-align: center;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(138,100,34,0.2);
+    }
+
+    .chapter-label {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.58rem, 1.5vw, 0.7rem);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+    }
+
+    .chapter-title {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      color: var(--gold);
+      margin-top: 0.3rem;
+      line-height: 1.3;
+    }
+
+    .chapter-sub {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.55rem, 1.3vw, 0.65rem);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      margin-top: 0.4rem;
+      opacity: 0.7;
+    }
+
+    /* ── Text area ── */
+    .text-area {
+      overflow: hidden;
+      position: relative;
+      padding: 1.5rem 0;
+    }
+
+    #para-pool { display: none; }
+
+    #page-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      animation: pageFade 0.4s ease;
+    }
+
+    @keyframes pageFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #page-content p {
+      font-size: var(--font-size, 1.15rem);
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 1em;
+    }
+
+    #page-content p:last-child { margin-bottom: 0; }
+
+    #page-content p.entry-head {
+      font-family: 'Cinzel', serif;
+      font-size: calc(var(--font-size, 1.15rem) * 0.72);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      font-style: normal;
+      margin-bottom: 1.4em;
+      line-height: 1.6;
+    }
+
+    #page-content p.marginalia {
+      border-left: 2px solid var(--gold-dim);
+      padding-left: 1rem;
+      font-style: italic;
+      color: var(--text-sub);
+      margin-top: 0.5em;
+    }
+
+    #page-content p.scene-break {
+      text-align: center;
+      color: var(--gold-dim);
+      font-style: normal;
+      letter-spacing: 0.5em;
+      margin: 0.5em 0;
+    }
+
+    /* ── Bottom nav ── */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 0 1.2rem;
+      border-top: 1px solid rgba(138,100,34,0.2);
+      gap: 1rem;
+      background: var(--bg);
+    }
+
+    .nav-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover:not(:disabled) { color: var(--gold); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.25; cursor: default; }
+
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      flex: 1;
+    }
+
+    .page-indicator {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      opacity: 0.7;
+    }
+
+    .font-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .font-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      cursor: pointer;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      transition: color 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .font-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .theme-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      padding: 0.4rem 0.7rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .theme-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .toc-link {
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      text-decoration: none;
+      opacity: 0.6;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    .toc-link:hover { opacity: 1; color: var(--gold); }
+
+    /* tap zones for mobile */
+    .tap-prev, .tap-next {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      z-index: 50;
+      cursor: pointer;
+      opacity: 0;
+    }
+    .tap-prev { left: 0; }
+    .tap-next { right: 0; }
+  </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<div id="para-pool">
+
+  <p class="entry-head">Watcher's Observation — Entry: 0018 — Messy Politics</p>
+
+  <p>Well, I can only begin by saying that, in the end, there were two naked women in two distinctly different situations.</p>
+
+  <p>One lay on the ground, unconscious—stripped of the swirling shadows that once signified her mastery of Shadowmancy.</p>
+
+  <p>The other, a druid—tall, proud, athletic—stood looking about with a dazed expression, as if lost… or uncertain.</p>
+
+  <p>Greighton, ever a man of action, behaved in accordance with that well-earned reputation. He hurriedly tore down a banner from the dais—drawing no recrimination, no cries of surprise from the still-stunned politicians gathered there.</p>
+
+  <p>All of them looked foolish.</p>
+
+  <p>Even Vael'Astra. Not one moved to act. Instead, they allowed their precious Sovereign Guard—and our trio—to do all the work. And by work, I mean saving their lives.</p>
+
+  <p>And yet, there was Greighton—pulling the Songweaver's banner free as though it were nothing more than a washroom towel. With the faintest pink touching his ears, he ran to the naked Ranessa and draped it across her shoulders.</p>
+
+  <p>His eyes were averted—like a gentleman. Which, I suppose, applies regardless of profession.</p>
+
+  <p>Modesty, it seems, still matters.</p>
+
+  <p>But that was not what caught my attention.</p>
+
+  <p>More Sovereign Guard had arrived. With pikes and swords leveled, they advanced upon Jadsia, intent on delivering the final blow—something I would have very much liked to witness.</p>
+
+  <p>But alas, Niven Kael found his moment of civility.</p>
+
+  <p>"Hold your weapons," he shouted. "We are civilized. And although she is not, a trial shall be held."</p>
+
+  <p>A trial?</p>
+
+  <p>For a mass-murdering Shadowmancer with all the moral architecture of a starving wolf… she is afforded the decency of a trial?</p>
+
+  <p>Curious.</p>
+
+  <p>Still, even that was not what held my attention.</p>
+
+  <p>After Greighton placed the makeshift covering over Ranessa, her hand—bloodied, yet her own, no longer that of a wild bear—found his.</p>
+
+  <p>She held on.</p>
+
+  <p>And I can only assume it was a physical plea for him not to leave.</p>
+
+  <p class="marginalia">The council will shout and declare their bravery. But when they realize the vote has passed—perhaps their hubris will temper, if only enough to seek another Shadow Hunter. One who might, at the very least, forestall the next Jadsia-like Shadowmancer until reinforcements arrive. And Greighton… He looked—almost human. Despite the blood and gore coating the hand that held his. It was… Endearing.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p>The banner was itchy.</p>
+
+  <p>It wasn't made for comfort. The cotton was rough, the seams uneven—scratchy against her skin—but he had placed it on her to protect her dignity.</p>
+
+  <p>Ranessa had never given much thought to dignity—at least not in this sense—but the man standing just behind her shoulder looked as though he would defend it with his dying breath.</p>
+
+  <p>What an idiot.</p>
+
+  <p>And yet… somehow, some way, this was exactly the kind of fool she wanted around—always.</p>
+
+  <p>The argument she was privy to, however, had been raging for at least a quarter of an hour. Greighton—though his name had been brought up multiple times—said nothing.</p>
+
+  <p>Across from her, the massive Thálmen stood guard beside the small couch in Vael'Astra's office, where Sune lay.</p>
+
+  <p>Slumbering, she hoped.</p>
+
+  <p>Because the girl had not moved since using Aeris to tear Jadsia from the shadows and drag her back into corporeal form.</p>
+
+  <p>"And you have now put the entirety of the Cradle in jeopardy because of some fanciful dream of heroism," Councilor Draveth seethed, pointing a chubby finger toward Greighton.</p>
+
+  <p>"You," he continued, "brought this wrath upon us. And now you have another pet beast parading as a Veylen? What games are you—"</p>
+
+  <p>She felt the rage rising—but this time it was different. Not the explosive fury from before. This was slower. Simmering. Annoyed.</p>
+
+  <p>It was not Greighton who spoke in her defense.</p>
+
+  <p>Instead, the door burst open.</p>
+
+  <p>Her mother entered—an ancient-looking elf with affectations as questionable as ever. She must have been waiting just outside. And, being the Arch-Druid, it seemed she could storm into the Councilor Prime's office unannounced.</p>
+
+  <p>Typical.</p>
+
+  <p>"You dare not speak of my daughter that way!" the woman declared. "Without her—and the power of the Great Ursa—you all would be—"</p>
+
+  <p>And for the first time in many moons… her mother sounded proud.</p>
+
+  <p>She was called the Hero of the Coppice.</p>
+
+  <p>Her mother continued, raging—pointing an accusing finger between Vael'Astra and Draveth, addressing them like children caught stealing sweets, but with a vitriol so practiced it rang hollow.</p>
+
+  <p>Ranessa did not believe it. Not for a moment.</p>
+
+  <p>Her head lowered.</p>
+
+  <p>"Why do you hang your head, my daughter?"</p>
+
+  <p>My daughter.</p>
+
+  <p>Just a week ago, she had claimed Ranessa was never truly of her womb. A wasted opportunity of Veylen blood and pride.</p>
+
+  <p>"I am not…" Ranessa said softly, trailing off.</p>
+
+  <p>"You are not what?" her mother stepped closer.</p>
+
+  <p>And as she did, Ranessa felt Greighton shift—tense… no, coil.</p>
+
+  <p>"I am not some prize you can parade," Ranessa said, her voice barely above a whisper. Yet in the silence, it rang clear. "Not after what you did to me."</p>
+
+  <p>"I…" the woman faltered. "I do not think of you as a prize. You are my blood, my daughter. Your father would be—"</p>
+
+  <p>Something gave.</p>
+
+  <p>Not a snap of rage—but the quiet breaking of something long frayed. A bond stretched too thin for too long.</p>
+
+  <p>Her shoulders slumped. Her head shook.</p>
+
+  <p>"Leave, Mother. There is work to be done."</p>
+
+  <p>She did not look up.</p>
+
+  <p>The rage building around her mother—the resonance—was palpable. Everyone could feel it.</p>
+
+  <p>But did her mother not realize that here… she was—</p>
+
+  <p>"You are nothing, Mother," Ranessa said, louder now. "You are—"</p>
+
+  <p>"Nothing?"</p>
+
+  <p>Now the rage came in full.</p>
+
+  <p>"You are a coward," her mother spat, "who cost the lives of good men and women—and yet you stand here while they lie dead. A disgrace—"</p>
+
+  <p>Ranessa forced herself to look up as spittle flew from her mother's mouth.</p>
+
+  <p>"You will leave this place. You will abandon that urchin you found in the forest—and these outsiders. I order you to return, or I will—"</p>
+
+  <p>Greighton moved.</p>
+
+  <p>It was so fast the only sign was the displacement of air—and the sharp hiss of twin blades leaving their sheaths.</p>
+
+  <p>And for the first time, Ranessa saw something on her mother's face she had never seen before.</p>
+
+  <p>Fear.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p class="entry-head">Watcher's Observation — Entry: 0019 — The Breaking of a Lineage; for the Betterment of Rivendawn</p>
+
+  <p>Ranessa looked… terrible.</p>
+
+  <p>But then, who wouldn't?</p>
+
+  <p>She had just become a raging ursine beast—and one she seemed to control, no less. Because, in this moment? If it were me—if I were being spoken to in such a manner—claws would have descended, and disembowelment would have followed shortly thereafter.</p>
+
+  <p>But alas, it seems an Ursa possesses far more restraint than I.</p>
+
+  <p>An odd realization.</p>
+
+  <p>To have one's sensibilities so thoroughly assaulted—and in such an offensively personal fashion? I would not suffer it.</p>
+
+  <p class="marginalia">And, it would seem, Greighton shares a similar conviction. How… quaint.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p>No one was going to stop him.</p>
+
+  <p>Not steel. Not Resonance. Nothing.</p>
+
+  <p>Nothing would keep him from destroying the cancerous woman before him.</p>
+
+  <p>Arch-Druid or not—she was a blight. And he intended to erase her from any future history.</p>
+
+  <p>His swords were already drawn, his hands tight around the leather-wrapped hilts. He could feel Terra and Aeris flowing through him—</p>
+
+  <p>Not as forces to command…</p>
+
+  <p>But as if they were bound to him.</p>
+
+  <p>As if they moved at the pull of his bloodlust, like marionette strings drawn taut through his veins.</p>
+
+  <p>"Grey."</p>
+
+  <p>A voice—tender. A plea wrapped in need.</p>
+
+  <p>And the need… was him.</p>
+
+  <p>"Stop."</p>
+
+  <p>And in that moment—across all his lived history in Rivendawn—Greighton Lastlight discovered something he had never known.</p>
+
+  <p>Someone who could stop him.</p>
+
+  <p>Not with steel.</p>
+
+  <p>Not with Resonance.</p>
+
+  <p>But with her.</p>
+
+  <p>With that single command, he acquiesced. His blades slid back into the crossed bandolier at his back.</p>
+
+  <p>He said nothing. His eyes remained locked on the Arch-Druid.</p>
+
+  <p>"Grey…"</p>
+
+  <p>Her voice, softer now, pulled at him—as though all the Terra in the realm itself drew him backward. And he could not resist it.</p>
+
+  <p>He said nothing—because he was fighting.</p>
+
+  <p>Fighting the urge to destroy the woman before him.</p>
+
+  <p>She was—</p>
+
+  <p>"Not worth it," Ranessa said.</p>
+
+  <p>The banner rustled as she moved, the soft shuffle of bare feet against the rug reaching his ears.</p>
+
+  <p>"I divorce you, Mother. No longer am I daughter to the Arch-Druid."</p>
+
+  <p>Grey heard it then—the low, rising growl beneath her voice. The bear.</p>
+
+  <p>"And if you ever speak of Father again…"</p>
+
+  <p>The growl deepened.</p>
+
+  <p>"I will tear every bough, uproot every tree, until I have unmade you."</p>
+
+  <p>A pause.</p>
+
+  <p>"Now leave."</p>
+
+  <p>The Arch-Druid's voice rose—grasping for control.</p>
+
+  <p>"I will do no such—"</p>
+
+  <p>A surge of Aeris—potent and irresistible—shoved the druid from the office. A follow-up gust slammed the door shut behind her.</p>
+
+  <p>Greighton heard Vael'Astra's voice clearly from his right:</p>
+
+  <p>"I wish not to be disturbed."</p>
+
+  <p>He looked at Ranessa, her shoulders level with his—and she was shaking.</p>
+
+  <p>He let out a barely audible sigh. He was no coward. But in matters of the social realm, his bravery was sorely lacking.</p>
+
+  <p>"Please, 'Nessa," he said, motioning to the seat. "Sit."</p>
+
+  <p>Her eyes—green, jade-bright—were wide with shock as she stared at him. And then, something he had rarely seen on her face appeared.</p>
+
+  <p>A smile.</p>
+
+  <p>She nodded. The smile faded easily back into neutrality, and she sat with a heavy thud, releasing a long breath.</p>
+
+  <p>"You were saying, Councilor?" Greighton asked, his tone purposefully diffident—bordering on uncaring—as he stood beside Ranessa.</p>
+
+  <p>"That you… have…" The man faltered, his expression twisting into a begrudging surrender. "Have much work that needs to be done."</p>
+
+  <p>He spun on his heel, robes billowing dramatically, and exited—leaving behind nothing but a deafening silence.</p>
+
+  <p>The silence settled over the room.</p>
+
+  <p>Vael'Astra looked lost in thought. Gunnar stood protectively over the inert form of Sune.</p>
+
+  <p>And Ranessa…</p>
+
+  <p>Nessa.</p>
+
+  <p>The nickname had slipped out without thought. But just as with the men and women of his Vanguard—everyone had earned one from Grey. Why should Ranessa be any different?</p>
+
+  <p>"What do you plan to do next, Greighton?"</p>
+
+  <p>It was Vael'Astra who asked—and he could hear the uncertainty in her voice.</p>
+
+  <p>"I am going to take Sune to a healer…" he began.</p>
+
+  <p>Gunnar's cough cut in. Greighton glanced to his friend and offered an easy, genuine smile.</p>
+
+  <p>"Yes, brother—to her, of course," he said, the smile fading into a grin. "I am no fool."</p>
+
+  <p>And yet, as he said it, his eyes drifted to Ranessa—who no longer seemed so distant.</p>
+
+  <p>"Debatable," she said with a huff.</p>
+
+  <p>The only one who laughed was the Councilor Prime.</p>
+
+  <p>Before Greighton could continue, a familiar knock sounded at the door.</p>
+
+  <p>Two quick raps. A pause. Then three evenly spaced knocks.</p>
+
+  <p>He knew that pattern.</p>
+
+  <p>That was how the Scribes of the Crimson Citadel announced themselves when a door was closed—reasons known only to the Citadel.</p>
+
+  <p>There was only one man here who would use it.</p>
+
+  <p>Serith Veyren.</p>
+
+  <p>His parents had died when he was barely into manhood—during the final days of the Crimson Citadel as it once was.</p>
+
+  <p>"Serith," Vael'Astra said, recognizing the knock. "Enter."</p>
+
+  <p>The door opened, and in stepped a slender man. There was nothing imposing about Serith's frame—but the knowledge he carried was another matter entirely.</p>
+
+  <p>Aeris and Aqua—his Resonant specialties—lived sharp and dangerous within him.</p>
+
+  <p>He had surpassed his parents before he was even seven. And Greighton had made certain no other child mistook his slight frame for weakness.</p>
+
+  <p>A lesson well learned.</p>
+
+  <p>Perhaps one Greighton had meddled too freely in delivering.</p>
+
+  <p>Especially after Serith had repaid that protection by hurling a group of bullies backward—straight into a horse trough—before dumping its full contents over them.</p>
+
+  <p>Water. Filth. All of it.</p>
+
+  <p>Unceremoniously delivered.</p>
+
+  <p>Serith could take care of himself. He never needed Grey to do it for him.</p>
+
+  <p>"I think…" Serith began, pausing as a faint rustling sounded beyond the closed door. Everyone heard it—but his attention returned to Greighton.</p>
+
+  <p>"I think you should take your newfound friend and go to the Azure Citadel. I believe Veysha can help you."</p>
+
+  <p>"Are you insane, Serith?" Vael'Astra demanded. "He will be arrested the moment he returns—"</p>
+
+  <p>"I will," Greighton said with a nod, utterly certain. "But I will be released."</p>
+
+  <p>"And how do you know that?" Elurien Vael'Astra pressed.</p>
+
+  <p>"Because everything," he said smoothly, "that has come to pass was already shown to me."</p>
+
+  <p>He glanced briefly to the Councilor Prime.</p>
+
+  <p>"In my dream."</p>
+
+  <p>A beat.</p>
+
+  <p>"And yes—we need to go to the Azure Citadel."</p>
+
+  <p>The Councilor Prime muttered, "How much of the dream have you not revealed?"</p>
+
+  <p>Greighton said nothing. His attention shifted back to Serith, his head inclining slightly—an unspoken prompt.</p>
+
+  <p>"You'll need the Waypoint Stone," Serith said with a sigh. "We found another near where the Azure Citadel now stands."</p>
+
+  <p>"And?" Greighton pressed, wariness creeping in.</p>
+
+  <p>"Its sister stone is in the Overgrown Grotto."</p>
+
+  <p>"Oh."</p>
+
+  <p>Ranessa chuckled.</p>
+
+  <p>"I…" The thought unsettled him. "I need to go—"</p>
+
+  <p>The door burst open.</p>
+
+  <p>The Seneschal's protests trailed in behind the intruder. "She does not wish to be disturbed!"</p>
+
+  <p>A woman stormed in—barely five feet tall, perhaps more with boots. Her round face, usually warm with color, was now fully flushed with fury.</p>
+
+  <p>"Let me see her!"</p>
+
+  <p>She barreled past Greighton, nearly knocking him off balance. He caught himself just short of collapsing into Ranessa's lap.</p>
+
+  <p>"And where do you think you're going?" she snapped.</p>
+
+  <p>"The Overgrown Arbor…" he replied, almost sullen.</p>
+
+  <p>"Bah!"</p>
+
+  <p>She dismissed him instantly and turned to Gunnar.</p>
+
+  <p>Her hands flew—sharp, precise. Adryah.</p>
+
+  <p>Why didn't you come get me?</p>
+
+  <p>Gunnar's hands answered quickly. I was going to—Grey was!</p>
+
+  <p>"Bah. You're both menaces."</p>
+
+  <p>She dropped beside Sune, and a soft violet glow spread from her hands, wrapping the girl in gentle light.</p>
+
+  <p>Adryah's shoulders eased. She pressed a kiss to Sune's head.</p>
+
+  <p>"Her Wellspring is nearly empty," she murmured. "Poor child."</p>
+
+  <p>She stood, concern replacing anger.</p>
+
+  <p>"You," she said, pointing at Gunnar. "Take her home."</p>
+
+  <p>Then, to Vael'Astra—</p>
+
+  <p>"Contact your sister."</p>
+
+  <p>"Yes, Master Healer," Vael'Astra replied, properly chastened.</p>
+
+  <p>Greighton smiled.</p>
+
+  <p>"And what are you smiling at?" Adryah snapped. "Go with Gunnar. Get the house ready."</p>
+
+  <p>Her tone softened as she turned to Ranessa.</p>
+
+  <p>"And you… my home is open. Will you rest there? It's no home-stone, but it is safe."</p>
+
+  <p>"Yes, please," Ranessa answered immediately.</p>
+
+  <p>Adryah turned, fixing her towering husband with a look—then cut the same look toward Greighton.</p>
+
+  <p>"Why are you still here?"</p>
+
+  <p>"Yes, Master Healer," Greighton replied, smiling again—his second genuine one today.</p>
+
+  <p>"Go, go—" she began, then paused, eyeing the banner around Ranessa's shoulders.</p>
+
+  <p>A sigh.</p>
+
+  <p>"Of course he tore down a banner to cover you."</p>
+
+  <p>As Greighton made his exit, the last thing he heard—</p>
+
+  <p>"That boy is so stupid."</p>
+
+  <p>Vael'Astra laughed too—but that laugh gave Greighton pause. A whole different conversation was about to happen, and that made him wary.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p class="entry-head">Watcher's Observation — Entry: 0020 — Notice, No One Argued with Her?</p>
+
+  <p>The Master Healer is the only being, the only being, the only entity in all of Rivendawn that would have the gall to ask the Indomitable himself where he put the mountains.</p>
+
+  <p>Adryah is something special. A gentle woman with a strength that bends the wills of the unbendable.</p>
+
+  <p>While Greighton obeyed—it was not in the same way he did with Ranessa.</p>
+
+  <p>Ignoring Adryah has negative impacts on his health care.</p>
+
+  <p>Ignoring Ranessa?</p>
+
+  <p>I don't know what that would entail, nor do I desire to find out.</p>
+
+  <p class="marginalia">This is not over. I think I will stay with Adryah for a while, then move to their quaint little town house outside the river's edge.</p>
+
+</div>
+
+<!-- Mobile tap zones -->
+<div class="tap-prev" id="tap-prev"></div>
+<div class="tap-next" id="tap-next"></div>
+
+<div class="reader">
+
+  <div class="chapter-header">
+    <p class="chapter-label">Chapter Seven</p>
+    <p class="chapter-title">Itchy Irritations</p>
+  </div>
+
+  <div class="text-area" id="text-area">
+    <div id="page-content"></div>
+  </div>
+
+  <nav class="nav-bar">
+    <button class="nav-btn" id="prev-btn" onclick="prevPage()" disabled>&#8592; Prev</button>
+
+    <div class="nav-center">
+      <span class="page-indicator" id="page-indicator">Page 1</span>
+      <div class="font-controls">
+        <button class="font-btn" onclick="adjustFont(-1)" title="Smaller">A&#8331;</button>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">&#9790; Dark</button>
+        <button class="font-btn" onclick="adjustFont(1)"  title="Larger">A&#8314;</button>
+      </div>
+      <a class="toc-link" href="toc.html">&#8617; Contents</a>
+    </div>
+
+    <button class="nav-btn" id="next-btn" onclick="nextPage()">Next &#8594;</button>
+  </nav>
+
+</div>
+
+<script>
+  // ── Token guard ──
+  (function() {
+    const token = sessionStorage.getItem('re_token');
+    if (!token) {
+      window.location.href = 'https://jpcauthor.github.io/resonant-echoes/login.html';
+    }
+  })();
+
+  // ── Theme ──
+  const body     = document.body;
+  const themeBtn = document.getElementById('theme-btn');
+  const saved    = localStorage.getItem('re_theme') || 'dark';
+
+  if (saved === 'dark') { body.classList.add('dark'); themeBtn.textContent = '☀ Light'; }
+  else { themeBtn.textContent = '☽ Dark'; }
+
+  function toggleTheme() {
+    const isDark = body.classList.toggle('dark');
+    themeBtn.textContent = isDark ? '☀ Light' : '☽ Dark';
+    localStorage.setItem('re_theme', isDark ? 'dark' : 'light');
+    buildPages();
+  }
+
+  // ── Font size ──
+  let fontSize = parseFloat(localStorage.getItem('re_fontsize') || '1.15');
+  document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+
+  function adjustFont(dir) {
+    fontSize = Math.min(1.6, Math.max(0.9, fontSize + dir * 0.1));
+    localStorage.setItem('re_fontsize', fontSize);
+    document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+    buildPages();
+  }
+
+  // ── Pagination engine ──
+  let pages       = [];
+  let currentPage = 0;
+
+  function buildPages() {
+    const pool    = document.getElementById('para-pool');
+    const area    = document.getElementById('text-area');
+    const content = document.getElementById('page-content');
+    const paras   = Array.from(pool.children);
+    const areaH   = area.clientHeight;
+
+    pages = [];
+    let currentGroup = [];
+
+    const testDiv = document.createElement('div');
+    testDiv.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      visibility: hidden;
+      pointer-events: none;
+      width: ${content.clientWidth}px;
+      font-size: ${fontSize}rem;
+      line-height: 1.85;
+      font-family: 'EB Garamond', Georgia, serif;
+      padding: 0;
+      margin: 0;
+    `;
+    area.appendChild(testDiv);
+
+    const threshold = areaH * 0.82;
+
+    for (const para of paras) {
+      currentGroup.push(para);
+      testDiv.innerHTML = currentGroup.map(p => p.outerHTML).join('');
+
+      if (testDiv.offsetHeight > threshold && currentGroup.length > 1) {
+        currentGroup.pop();
+        pages.push([...currentGroup]);
+        currentGroup = [para];
+        testDiv.innerHTML = para.outerHTML;
+      }
+    }
+
+    if (currentGroup.length) pages.push([...currentGroup]);
+    area.removeChild(testDiv);
+
+    if (currentPage >= pages.length) currentPage = pages.length - 1;
+    renderPage();
+  }
+
+  function renderPage() {
+    const content = document.getElementById('page-content');
+    content.style.animation = 'none';
+    content.offsetHeight;
+    content.style.animation = '';
+    content.innerHTML = pages[currentPage]
+      ? pages[currentPage].map(p => p.outerHTML).join('')
+      : '';
+
+    document.getElementById('page-indicator').textContent =
+      `Page ${currentPage + 1} of ${pages.length}`;
+    document.getElementById('prev-btn').disabled = currentPage === 0;
+    document.getElementById('next-btn').disabled = currentPage === pages.length - 1;
+  }
+
+  function nextPage() {
+    if (currentPage < pages.length - 1) { currentPage++; renderPage(); }
+  }
+
+  function prevPage() {
+    if (currentPage > 0) { currentPage--; renderPage(); }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextPage();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevPage();
+  });
+
+  document.getElementById('tap-next').addEventListener('click', nextPage);
+  document.getElementById('tap-prev').addEventListener('click', prevPage);
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(buildPages, 200);
+  });
+
+  window.addEventListener('load', buildPages);
+
+  // ── Starfield ──
+  const canvas = document.getElementById('stars');
+  const ctx    = canvas.getContext('2d');
+  let W, H, stars = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function initStars(n = 180) {
+    stars = Array.from({ length: n }, () => ({
+      x:  Math.random() * W,
+      y:  Math.random() * H,
+      r:  Math.random() * 1.1 + 0.2,
+      a:  Math.random(),
+      da: (Math.random() - 0.5) * 0.003
+    }));
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      s.a += s.da;
+      if (s.a < 0.05 || s.a > 1) s.da *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(245,236,215,${s.a.toFixed(2)})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(drawStars);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize(); initStars(); drawStars();
+</script>
+</body>
+</html>
