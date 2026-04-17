@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Resonant Echoes — Chapter 9</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:     #c9973a;
+      --gold-dim: #8a6422;
+    }
+
+    body {
+      --bg:       #f5ecd7;
+      --bg-2:     #ede0c4;
+      --text:     #2a1f0a;
+      --text-sub: #5a3e1b;
+      --rule:     #8a6422;
+      background: var(--bg);
+      font-family: 'EB Garamond', Georgia, serif;
+      color: var(--text);
+      transition: background 0.4s, color 0.4s;
+      overflow: hidden;
+    }
+
+    body.dark {
+      --bg:       #1a1208;
+      --bg-2:     #241a0c;
+      --text:     #f5ecd7;
+      --text-sub: #c9973a;
+      --rule:     #8a6422;
+    }
+
+    /* starfield */
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.6s;
+    }
+    body.dark #stars { opacity: 1; }
+
+    /* ── Page container ── */
+    .reader {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100dvh;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ── Chapter header ── */
+    .chapter-header {
+      padding: 2rem 0 1.2rem;
+      text-align: center;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(138,100,34,0.2);
+    }
+
+    .chapter-label {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.58rem, 1.5vw, 0.7rem);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+    }
+
+    .chapter-title {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      color: var(--gold);
+      margin-top: 0.3rem;
+      line-height: 1.3;
+    }
+
+    .chapter-sub {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.55rem, 1.3vw, 0.65rem);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      margin-top: 0.4rem;
+      opacity: 0.7;
+    }
+
+    /* ── Text area ── */
+    .text-area {
+      overflow: hidden;
+      position: relative;
+      padding: 1.5rem 0;
+    }
+
+    #para-pool { display: none; }
+
+    #page-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      animation: pageFade 0.4s ease;
+    }
+
+    @keyframes pageFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #page-content p {
+      font-size: var(--font-size, 1.15rem);
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 1em;
+    }
+
+    #page-content p:last-child { margin-bottom: 0; }
+
+    #page-content p.entry-head {
+      font-family: 'Cinzel', serif;
+      font-size: calc(var(--font-size, 1.15rem) * 0.72);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      font-style: normal;
+      margin-bottom: 1.4em;
+      line-height: 1.6;
+    }
+
+    #page-content p.marginalia {
+      border-left: 2px solid var(--gold-dim);
+      padding-left: 1rem;
+      font-style: italic;
+      color: var(--text-sub);
+      margin-top: 0.5em;
+    }
+
+    #page-content p.marginalia strong {
+      font-style: normal;
+    }
+
+    #page-content p.scene-break {
+      text-align: center;
+      color: var(--gold-dim);
+      font-style: normal;
+      letter-spacing: 0.5em;
+      margin: 0.5em 0;
+    }
+
+    /* ── Bottom nav ── */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 0 1.2rem;
+      border-top: 1px solid rgba(138,100,34,0.2);
+      gap: 1rem;
+      background: var(--bg);
+    }
+
+    .nav-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover:not(:disabled) { color: var(--gold); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.25; cursor: default; }
+
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      flex: 1;
+    }
+
+    .page-indicator {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      opacity: 0.7;
+    }
+
+    .font-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .font-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      cursor: pointer;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      transition: color 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .font-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .theme-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      padding: 0.4rem 0.7rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .theme-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .toc-link {
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      text-decoration: none;
+      opacity: 0.6;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    .toc-link:hover { opacity: 1; color: var(--gold); }
+
+    /* tap zones for mobile */
+    .tap-prev, .tap-next {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      z-index: 50;
+      cursor: pointer;
+      opacity: 0;
+    }
+    .tap-prev { left: 0; }
+    .tap-next { right: 0; }
+  </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<div id="para-pool">
+
+  <p class="entry-head">Watcher's Observation — Entry: 0024 — Breakfast Is the Most Important Meal of the Day</p>
+
+  <p>Greighton had left before Adryah could serve breakfast. She had made some concoction that involved batter and berries.</p>
+
+  <p>Ranessa and Gunnar seemingly had a competition to see who could eat the most, and I must admit it was close—Gunnar almost won.</p>
+
+  <p>Sune, however, was not present for breakfast this morning. Instead, she stood outside on the banks of the river, watching the water rush past the large island in the middle where the Velatrium stood.</p>
+
+  <p>She stood there stoically, with no one to bother her but her own thoughts.</p>
+
+  <p>I cannot say I know what she was thinking, but I can say that neither a smile nor a frown crossed her face—instead, a look of curiosity had claimed residency of the young woman.</p>
+
+  <p>That was until a man, about her age—at least in appearance—came to stand next to her, and after a few moments of silence, he finally said, "Good morning."</p>
+
+  <p>He scared her.</p>
+
+  <p>It took Greighton to get him out of the river after Sune inexplicably summoned the prowess of Terra to lurch and launch the young man into the rushing waters.</p>
+
+  <p class="marginalia"><strong>Watcher's Marginalia:</strong> Wherever Greighton had gone, it brought him back to the townhouse in time to see the young Avenen flying through the air, only to land in the rushing waters below. I think, in the past three days, I've seen Greighton Lastlight sigh more times than in the cumulative total that I have observed from him. But still, that doesn't answer where he had gone… So I must ask—before you saved that young man, Greighton— Where did you go?</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p>Sune watched in horror as Greighton pulled the soaked man up to the grassy bank of the river.</p>
+
+  <p>She could hear the familiar footsteps—or thuds, if one would—of Ranessa's approach, but it was Gunnar's she could feel as they shook the ground.</p>
+
+  <p>Ranessa's demand to know what had happened was cut off by laughter.</p>
+
+  <p>The source of the laughter?</p>
+
+  <p>The nearly doubled-over Adryah, who was slapping the tops of her thighs while pointing a finger at the victim of her sudden and rather surprising use of Terra.</p>
+
+  <p>"I am so sorry," Sune began, walking over to him as he drew off his drenched jerkin and began to wring it out.</p>
+
+  <p>As he stood up, Sune watched as he shook his head side to side; his slightly pointed elven ears were wet as strands of hair slapped against them—not as large as Ranessa's or the others'.</p>
+
+  <p>Then he did something that made her nearly stumble.</p>
+
+  <p>He gave her a smile that took not only her breath away, but she could feel herself swaying… off-kilter with her balance and enamored by that dazzling smile.</p>
+
+  <p>It was not until she took in his blue eyes that her cheeks began to warm.</p>
+
+  <p>"It's okay, I shouldn't have…"</p>
+
+  <p>And his voice! Oh, by the—whatever they call it—his voice was like…</p>
+
+  <p>"Shut up, Songweaver," Ranessa's gruff voice cut in. "Don't go scaring people like that—you're lucky it wasn't Ignis," she added, her tone a hostile recrimination.</p>
+
+  <p>"Apologies, Lady Druid…" the perfect voice said in a sweet tenor that made Sune want to hear him talk more.</p>
+
+  <p>"Stop while you're still alive, Avenen," Greighton had said as his hands glowed a light orange as he let them roam over his body.</p>
+
+  <p>What was he doing?</p>
+
+  <p>And then it dawned on her—Ignis. He was using Ignis to dry off his clothes.</p>
+
+  <p>"I'm sorry, Master Greighton, but…"</p>
+
+  <p>"I am going to throw your perfect…"</p>
+
+  <p>And Sune heard Grey's sigh. "Please, 'Nessa, I don't want to save him twice."</p>
+
+  <p>The growl came from deep within Ranessa, and it somehow snapped her back to reality until her eyes once again found the man with blue eyes and brown hair—his skin was like a honeyed brown, and perfect—nary a blemish on his body, even against his…</p>
+
+  <p>She paused as her mind drifted off, eyes locked on the shirtless Avenen. His abdomen was rippling as he dried himself off, each muscle going taut and then relaxing in some undulating dance of primitive motion.</p>
+
+  <p>"Put a shirt on, Songweaver," Ranessa growled one last time and stomped away.</p>
+
+  <p>But it served a purpose, or at least for Sune it did.</p>
+
+  <p>She pulled her head from the cloud and hurriedly followed Ranessa, as she could hear Greighton berating the man while Adryah's laughter began to fade as she tried to catch up with Ranessa.</p>
+
+  <p>"Ranessa!" Sune hissed, trying to match her strides but failing.</p>
+
+  <p>With a grunt, the druid stopped and cast a mildly irritated gaze back to her.</p>
+
+  <p>"What?"</p>
+
+  <p>The tone of her 'What' had Sune a bit nervous, but she pressed anyways. "What was that all about? I mean—I didn't mean to…" she stammered as she trailed off. "I just got scared it was a—"</p>
+
+  <p>She was cut off by Ranessa.</p>
+
+  <p>"That was fine," the druid huffed. "I don't like how he looked at you, nor how you look at him!"</p>
+
+  <p>"Oh."</p>
+
+  <p>"Don't 'oh' me, Sune. You were very much acting like a smitten girl who had never seen a…"</p>
+
+  <p>When Ranessa's voice trailed off, her eyes grew as wide as the breakfast plates that Adryah had used.</p>
+
+  <p>"Wait, you've never seen a man without his shirt off, have you?"</p>
+
+  <p>Embarrassed, she shook her head in the negative.</p>
+
+  <p>"Well," Ranessa's voice grew a bit—and, surprisingly, more happy, "then your reaction is absolutely commendable and expected," Ranessa grunted, the growling druid persona having returned.</p>
+
+  <p>"He did have a well-honed body, I will give him that much credit," Ranessa added hurriedly. "But be careful!"</p>
+
+  <p>"Why?" pleaded Sune.</p>
+
+  <p>"He's a Songweaver, a singer, a bard, a troubadour, or whatever you want to call them. He leaves your coin purse lighter and your village with one or two more maidens left carrying a babe."</p>
+
+  <p>"Oh."</p>
+
+  <p>"Plus, he's an Avenen—they can appear to fit in anywhere," Ranessa said warningly, "even in a Coppice," she added with neither vitriol nor loathing, but with something more emotional.</p>
+
+  <p>She watched as the druid stiffened, as if realizing she had said something she ought not to have, and then began to turn around to walk back into the townhouse.</p>
+
+  <p>"Come, let's pack," Ranessa ordered. "I have…"</p>
+
+  <p>Sune didn't let her finish. "Ranessa, what's wrong? You are like a storm—calm, then torrential downpour, then sprinkles of rain, and then hail—you're giving me emotional dizziness."</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p class="entry-head">Watcher's Observation — Entry: 0025 — Facing the Hymns of Reality…</p>
+
+  <p>I watched as Ranessa nearly stumbled.</p>
+
+  <p>She caught herself against the townhouse door, and she spun with a look that would have made most men, including Greighton, take a step back.</p>
+
+  <p>Instead, though, Sune kept her position—finally taking a step forward, and then another step.</p>
+
+  <p>With each one, Ranessa's brows furrowed more.</p>
+
+  <p class="marginalia"><strong>Watcher's Marginalia:</strong> The sound of Adryah's laughter could be heard moments after Grey told the young man to put his damned shirt back on. But that moment wouldn't mingle with that on the stoop. Instead, Ranessa glowered dubiously at Sune—but still said nothing. Maybe now would be… Oh, wait, no—Ranessa's about to say something.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p>"—emotional dizziness," she heard.</p>
+
+  <p>Adryah's laughter across the way was ignored, along with Grey's continual berating of the Songweaver. It was Sune's brazen and bold statement that had taken Ranessa aback.</p>
+
+  <p>Emotional dizziness, she had called it.</p>
+
+  <p>"Emotional dizziness?" she said through gritted teeth while staring at the still-approaching Chosen woman.</p>
+
+  <p>"What you call emotional dizziness is…" tighter she spoke, eyes narrowing—but surprisingly not a stirring moment or growl from the bear within.</p>
+
+  <p>"Is what?" came her gentle follow-up.</p>
+
+  <p>And like a salve or a pin that pops a balloon, Ranessa deflated and leaned against the wall. "My life," she finished. "Emotional dizziness is my damned life."</p>
+
+  <p>Sune stopped moving—and Ranessa half expected an "Oh."</p>
+
+  <p>Instead, Sune continued until she placed her hand atop Ranessa's and squeezed.</p>
+
+  <p>"Well, I guess I'll get dizzy with you—sounds like an adventure," prismatic eyes held Ranessa's gaze. "Right?"</p>
+
+  <p>Woodenly, she responded, "Right."</p>
+
+  <p>"Right?" Sune egged her on.</p>
+
+  <p>"Yeah, right," Ranessa rolled her eyes and pulled the smaller woman under her arm in a tight side-hug.</p>
+
+  <p>"Let's go pack."</p>
+
+  <p>"And a bath?" Sune quipped.</p>
+
+  <p>Ranessa growled, but by the Indomitable—she heard the bear within chuckle.</p>
+
+  <p>She paused as Sune led the way in.</p>
+
+  <p>There was a wash room upstairs, and she had her new leathers—perhaps now was the time to maybe start a day off fresh, regardless of Sune throwing a man into the river.</p>
+
+  <p>And how fortuitous, she mused while ascending the stairs, that Grey was there to pull him out.</p>
+
+  <p>At the top stair, she paused.</p>
+
+  <p>"Where did you go, Greighton?" she whispered.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p class="entry-head">Watcher's Observation — Entry: 0026 — Where Did You Go, Greighton?</p>
+
+  <p>That seemed to be the question of the day, didn't it? Or the morning, I would wager.</p>
+
+  <p>Greighton is an enigma, but he's become more so since Ranessa barreled her way into his life—and, of course, the pun was intended.</p>
+
+  <p>He's been exposed to someone who doesn't fear him, but respects him as an equal—and that alone is a change in environs for Greighton.</p>
+
+  <p>But most of all, Greighton is known to eschew the company of people who haven't known him for years.</p>
+
+  <p>But Ranessa?</p>
+
+  <p>The man was ready to kill her mother.</p>
+
+  <p>And Ranessa was ready to stop him.</p>
+
+  <p>While the world may either be coming to a catastrophic conclusion or a heroic moment of freedom, the Greighton and Ranessa portion will be more telling as time goes on.</p>
+
+  <p class="marginalia"><strong>Watcher's Marginalia:</strong> I'm sorry, Ranessa—my timing wasn't perfect. In fact, I was maybe a moment early, but when Greighton sees you in those leathers? The boy is liable to faint. Do catch him—those are sharp swords on his back.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p>"—And don't scare her like that," Grey said tightly. "I don't care how charismatic and charming you are, I have…"</p>
+
+  <p>Greighton trailed off as he felt a hand on his shoulder—a big, powerful, and steady hand.</p>
+
+  <p>Gunnar.</p>
+
+  <p>He looked up at his friend.</p>
+
+  <p>Gunnar was smiling until he hand-spoke.</p>
+
+  <p>He's a kid, Greighton. Remember when you were his age.</p>
+
+  <p>"When I was his age, I was traipsing around the Rivens, rescuing lost Scribes!"</p>
+
+  <p>Gunnar cocked his head to the side with what could only be described as an endearing look of patience.</p>
+
+  <p>Hands flew again, and then Grey stopped.</p>
+
+  <p>Elurien chose him, Gunnar's hands said. She would not send you an incapable twit.</p>
+
+  <p>A sigh.</p>
+
+  <p>He was right.</p>
+
+  <p>"Is this Owl business?"</p>
+
+  <p>"What?" a faux-innocent voice came from his right.</p>
+
+  <p>Grey turned and then crossed his arms over his chest, waiting for eye contact to be restored after the young half-elf had pulled his jerkin back on.</p>
+
+  <p>"Owls? You mean the short little fat bi—" but the man's answer died in his throat.</p>
+
+  <p>Grey knew he could give looks. He'd been doing it for years, but right now, the crackling of his knuckles as a fist formed, and the look in his eyes paused the Songweaver.</p>
+
+  <p>"Yes," he said quietly. "Vael'Astra sent me, but not because it is Owl business, but because—and—" he watched hands raise defensively, "Elurien said she wanted someone there to help you."</p>
+
+  <p>"She said that?" he asked—eyes not going wide, but emotionally—if Elurien had said that, then he'd have no worries about the Songweaver's competency.</p>
+
+  <p>"She did, sir," the 'r' trailing off, as if not certain how to address Greighton.</p>
+
+  <p>"Grey, call me Grey, and very well," he said calmly. "Go with Adryah and start collecting our provisions—we're going on foot to the Overgrown Grotto."</p>
+
+  <p>"By foot?"</p>
+
+  <p>"We're taking a shorter route—no paths," he responded.</p>
+
+  <p>It was a fair question.</p>
+
+  <p>"That means we'll be going by Vuldin's Quarry, won't we?"</p>
+
+  <p>Smart, Grey thought.</p>
+
+  <p>"And we'll be picking up our final traveler there."</p>
+
+  <p>"Him?"</p>
+
+  <p>A grin—a satisfied nod was given to the Songweaver.</p>
+
+  <p>"Amazing," was the distant and wistful response.</p>
+
+  <p>"Come with me, boy," Adryah said snappishly. "We need to pack."</p>
+
+  <p>Greighton watched him walk away with Adryah, who was speaking animatedly to him.</p>
+
+  <p>Greighton loosed a shrill whistle.</p>
+
+  <p>The man with the still-sopping jerkin spun.</p>
+
+  <p>"What's your name?"</p>
+
+  <p>A winsome smile and gentle cant of his head, as the man sketched a rather performative but excellent bow.</p>
+
+  <p>"Horatio," he rose. "Horatio of the Songweavers, at your service."</p>
+
+  <p>The smile was more than enough—and Grey both thanked and cursed Elurien.</p>
+
+  <p>Horatio was a known quantity about the Cradle—a skilled Songweaver, but also a man who could easily get into any secured room, safe, or place.</p>
+
+  <p>But there were no stories about indiscretions that followed Songweavers like Kael. Horatio—for all intents—was a young Avenen who loved to sing and perform his mission.</p>
+
+  <p>"Good enough," Grey commented and spun on a heel, while Gunnar's hand slapped his stomach—his sign for laughter.</p>
+
+  <p>Gunnar's heavy hand slapped him on the back, drawing his attention to the big man. He canted his head to the Thálmen, then watched his hand-speak.</p>
+
+  <p>Gunnar was right.</p>
+
+  <p>They needed to leave—soon.</p>
+
+  <p>He could hear Adryah's laughter and giggles coming from within the house. It took a lot to make that woman laugh, which was an oddity for any Hearthkin—but her? She'd seen enough in her time in the Vanguard.</p>
+
+  <p>As the laughter continued, Greighton paused an additional moment to listen. Making Adryah laugh like this—genuine, joyous, and full laughter—was a treat, and then the slapping came.</p>
+
+  <p>The kind that meant Gunnar had joined in on the laughter, and there, in the quiet solitude at the side of the townhouse, Greighton listened to the only two friends he thought ever needed to laugh in unison—something neither had done in a long while.</p>
+
+  <p>By the time Greighton had come up to the front, he carried three satchels with him. They had been neatly packed and filled with the necessities for a long hike—through lands inhabited by more unknowns than Grey cared to contemplate.</p>
+
+  <p>It was the squeaking of the hinges that drew his attention to the front door. Horatio strode out, that honey-brown skin glistening with sweat as Grey cast a curious but demanding look.</p>
+
+  <p>"She made me get up in the attic! Something about armor and weapons," he shrugged. "Strange place to keep an armory, but I wasn't going to say no."</p>
+
+  <p>Grey nodded, but couldn't figure out why—and then it dawned on him. He staggered back a bit, bumping into Gunnar, who passed behind him.</p>
+
+  <p>"Are you well, Greighton?" Horatio asked—somehow covering the distance that separated them both in the blink of an eye.</p>
+
+  <p>"I know what she was doing…" he said, and then looked up at Gunnar, who had a smile.</p>
+
+  <p>The kind of goofy smile the big man used to have years ago, in what felt like another life.</p>
+
+  <p>"She didn't?" he whispered.</p>
+
+  <p>The big man shook his head and said nothing, but was quickly beating a path away from Grey and into the backyard.</p>
+
+  <p>The door squeaked again, and it was Sune, followed by a beaming Adryah.</p>
+
+  <p>"Looks good on her, no?!" the Master Healer declared.</p>
+
+  <p>Sune strode out wearing the same type of armor Greighton wore. Thick, heavy leathers, tautly strung up, but in such a way that each seam and part of the leathers protected her.</p>
+
+  <p>But it was what was against her back that made him cast a wary glance to Adryah, but her shrug was known code for shut-the-hell-up.</p>
+
+  <p>Strapped into a bandolier across her back were two crossed swords—with two very familiar hilts that Greighton recognized.</p>
+
+  <p>Those were his swords.</p>
+
+  <p>The Captain's blades he had once wielded in service to the Crimson Citadel.</p>
+
+  <p>"Adryah," he began—sternly.</p>
+
+  <p>"Greighton," she retorted with a voice that was tight and sharp as a knife, "it fits, and those swords are serviceable, and good weapons forged in honor." Adryah poked a pudgy finger into his chest.</p>
+
+  <p>"They need a good home…" she began.</p>
+
+  <p>The squeaking of the door caught his attention again, and he barely registered Adryah's next statement of how badly Sune needs to be trained by another Auris.</p>
+
+  <p>Normally, he would have argued, but his eyes were stuck on the smug-looking Ranessa, who wore the tautest of fighting leathers. They were doubly thick, padded, with intricate weaving done across them, and the shoulder guards were sewn in.</p>
+
+  <p>As she walked past him, his nose filled with the scent of hibiscus and rose, her hair pulled and neatly woven together, and, like well-oiled leathers should, they made no noise as Ranessa strode by.</p>
+
+  <p>When her muscles would flex, so would the leathers that contoured to her like a second skin.</p>
+
+  <p>It was her laughter that snapped him out of the sudden reverie.</p>
+
+  <p>"You're drooling, Greighton…" she said in a voice that was gruff—but mischievously playful.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p class="entry-head">Watcher's Observation — Entry: 0027 — If I Could Only Have Warned Him</p>
+
+  <p>Sune striding out in aged Vanguard livery, bearing the Vanguard swords that once belonged to Greighton, would have been more than enough shock for the day.</p>
+
+  <p>The man had been through enough in his life.</p>
+
+  <p>But then Ranessa strolled out in her new Ursa-proofed leathers, thanks to Adryah, and immediately shut the man up.</p>
+
+  <p>Whether or not he was drooling, I couldn't tell—but Ranessa does not strike me as a person of grand hyperbole like Horatio.</p>
+
+  <p>But he stood there, and if he keeps standing like that—they'll be late for their departure time.</p>
+
+  <p class="marginalia"><strong>Watcher's Marginalia:</strong> It's been interesting to see Greighton in a more humane role lately. He's still that damnable shadow that would as soon end your life if his moral compass pointed towards your death. But they are now going to see "him," and I loathe this overuse of pronouns. They are going to see Thabius! And I have much fear about this.</p>
+
+</div>
+
+<!-- Mobile tap zones -->
+<div class="tap-prev" id="tap-prev"></div>
+<div class="tap-next" id="tap-next"></div>
+
+<div class="reader">
+
+  <div class="chapter-header">
+    <p class="chapter-label">Chapter IX</p>
+    <p class="chapter-title">Breakfast, Bandoliers, and Bad Ideas</p>
+    <p class="chapter-sub">Resonant Echoes</p>
+  </div>
+
+  <div class="text-area" id="text-area">
+    <div id="page-content"></div>
+  </div>
+
+  <nav class="nav-bar">
+    <button class="nav-btn" id="prev-btn" onclick="prevPage()" disabled>&#8592; Prev</button>
+
+    <div class="nav-center">
+      <span class="page-indicator" id="page-indicator">Page 1</span>
+      <div class="font-controls">
+        <button class="font-btn" onclick="adjustFont(-1)" title="Smaller">A&#8331;</button>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">&#9790; Dark</button>
+        <button class="font-btn" onclick="adjustFont(1)"  title="Larger">A&#8314;</button>
+      </div>
+      <a class="toc-link" href="toc.html">&#8617; Contents</a>
+    </div>
+
+    <button class="nav-btn" id="next-btn" onclick="nextPage()">Next &#8594;</button>
+  </nav>
+
+</div>
+
+<script>
+  // ── Token guard ──
+  (function() {
+    const token = sessionStorage.getItem('re_token');
+    if (!token) {
+      window.location.href = 'https://jpcauthor.github.io/resonant-echoes/login.html';
+    }
+  })();
+
+  // ── Theme ──
+  const body     = document.body;
+  const themeBtn = document.getElementById('theme-btn');
+  const saved    = localStorage.getItem('re_theme') || 'dark';
+
+  if (saved === 'dark') { body.classList.add('dark'); themeBtn.textContent = '☀ Light'; }
+  else { themeBtn.textContent = '☽ Dark'; }
+
+  function toggleTheme() {
+    const isDark = body.classList.toggle('dark');
+    themeBtn.textContent = isDark ? '☀ Light' : '☽ Dark';
+    localStorage.setItem('re_theme', isDark ? 'dark' : 'light');
+    buildPages();
+  }
+
+  // ── Font size ──
+  let fontSize = parseFloat(localStorage.getItem('re_fontsize') || '1.15');
+  document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+
+  function adjustFont(dir) {
+    fontSize = Math.min(1.6, Math.max(0.9, fontSize + dir * 0.1));
+    localStorage.setItem('re_fontsize', fontSize);
+    document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+    buildPages();
+  }
+
+  // ── Pagination engine ──
+  let pages       = [];
+  let currentPage = 0;
+
+  function buildPages() {
+    const pool    = document.getElementById('para-pool');
+    const area    = document.getElementById('text-area');
+    const content = document.getElementById('page-content');
+    const paras   = Array.from(pool.children);
+    const areaH   = area.clientHeight;
+
+    pages = [];
+    let currentGroup = [];
+
+    const testDiv = document.createElement('div');
+    testDiv.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      visibility: hidden;
+      pointer-events: none;
+      width: ${content.clientWidth}px;
+      font-size: ${fontSize}rem;
+      line-height: 1.85;
+      font-family: 'EB Garamond', Georgia, serif;
+      padding: 0;
+      margin: 0;
+    `;
+    area.appendChild(testDiv);
+
+    const threshold = areaH * 0.82;
+
+    for (const para of paras) {
+      currentGroup.push(para);
+      testDiv.innerHTML = currentGroup.map(p => p.outerHTML).join('');
+
+      if (testDiv.offsetHeight > threshold && currentGroup.length > 1) {
+        currentGroup.pop();
+        pages.push([...currentGroup]);
+        currentGroup = [para];
+        testDiv.innerHTML = para.outerHTML;
+      }
+    }
+
+    if (currentGroup.length) pages.push([...currentGroup]);
+    area.removeChild(testDiv);
+
+    if (currentPage >= pages.length) currentPage = pages.length - 1;
+    renderPage();
+  }
+
+  function renderPage() {
+    const content = document.getElementById('page-content');
+    content.style.animation = 'none';
+    content.offsetHeight;
+    content.style.animation = '';
+    content.innerHTML = pages[currentPage]
+      ? pages[currentPage].map(p => p.outerHTML).join('')
+      : '';
+
+    document.getElementById('page-indicator').textContent =
+      `Page ${currentPage + 1} of ${pages.length}`;
+    document.getElementById('prev-btn').disabled = currentPage === 0;
+    document.getElementById('next-btn').disabled = currentPage === pages.length - 1;
+  }
+
+  function nextPage() {
+    if (currentPage < pages.length - 1) { currentPage++; renderPage(); }
+  }
+
+  function prevPage() {
+    if (currentPage > 0) { currentPage--; renderPage(); }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextPage();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevPage();
+  });
+
+  document.getElementById('tap-next').addEventListener('click', nextPage);
+  document.getElementById('tap-prev').addEventListener('click', prevPage);
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(buildPages, 200);
+  });
+
+  window.addEventListener('load', buildPages);
+
+  // ── Starfield ──
+  const canvas = document.getElementById('stars');
+  const ctx    = canvas.getContext('2d');
+  let W, H, stars = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function initStars(n = 180) {
+    stars = Array.from({ length: n }, () => ({
+      x:  Math.random() * W,
+      y:  Math.random() * H,
+      r:  Math.random() * 1.1 + 0.2,
+      a:  Math.random(),
+      da: (Math.random() - 0.5) * 0.003
+    }));
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      s.a += s.da;
+      if (s.a < 0.05 || s.a > 1) s.da *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(245,236,215,${s.a.toFixed(2)})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(drawStars);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize(); initStars(); drawStars();
+</script>
+</body>
+</html>

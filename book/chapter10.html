@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Resonant Echoes — Chapter 10</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:     #c9973a;
+      --gold-dim: #8a6422;
+    }
+
+    body {
+      --bg:       #f5ecd7;
+      --bg-2:     #ede0c4;
+      --text:     #2a1f0a;
+      --text-sub: #5a3e1b;
+      --rule:     #8a6422;
+      background: var(--bg);
+      font-family: 'EB Garamond', Georgia, serif;
+      color: var(--text);
+      transition: background 0.4s, color 0.4s;
+      overflow: hidden;
+    }
+
+    body.dark {
+      --bg:       #1a1208;
+      --bg-2:     #241a0c;
+      --text:     #f5ecd7;
+      --text-sub: #c9973a;
+      --rule:     #8a6422;
+    }
+
+    /* starfield */
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.6s;
+    }
+    body.dark #stars { opacity: 1; }
+
+    /* ── Page container ── */
+    .reader {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100dvh;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ── Chapter header ── */
+    .chapter-header {
+      padding: 2rem 0 1.2rem;
+      text-align: center;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(138,100,34,0.2);
+    }
+
+    .chapter-label {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.58rem, 1.5vw, 0.7rem);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+    }
+
+    .chapter-title {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      color: var(--gold);
+      margin-top: 0.3rem;
+      line-height: 1.3;
+    }
+
+    .chapter-sub {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.55rem, 1.3vw, 0.65rem);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      margin-top: 0.4rem;
+      opacity: 0.7;
+    }
+
+    /* ── Text area ── */
+    .text-area {
+      overflow: hidden;
+      position: relative;
+      padding: 1.5rem 0;
+    }
+
+    #para-pool { display: none; }
+
+    #page-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      animation: pageFade 0.4s ease;
+    }
+
+    @keyframes pageFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #page-content p {
+      font-size: var(--font-size, 1.15rem);
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 1em;
+    }
+
+    #page-content p:last-child { margin-bottom: 0; }
+
+    #page-content p.entry-head {
+      font-family: 'Cinzel', serif;
+      font-size: calc(var(--font-size, 1.15rem) * 0.72);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      font-style: normal;
+      margin-bottom: 1.4em;
+      line-height: 1.6;
+    }
+
+    #page-content p.marginalia {
+      border-left: 2px solid var(--gold-dim);
+      padding-left: 1rem;
+      font-style: italic;
+      color: var(--text-sub);
+      margin-top: 0.5em;
+    }
+
+    #page-content p.marginalia strong {
+      font-style: normal;
+    }
+
+    #page-content p.scene-break {
+      text-align: center;
+      color: var(--gold-dim);
+      font-style: normal;
+      letter-spacing: 0.5em;
+      margin: 0.5em 0;
+    }
+
+    #page-content p.lyric {
+      text-align: center;
+      font-style: italic;
+      color: var(--text);
+      margin-bottom: 0.4em;
+    }
+
+    /* ── Bottom nav ── */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 0 1.2rem;
+      border-top: 1px solid rgba(138,100,34,0.2);
+      gap: 1rem;
+      background: var(--bg);
+    }
+
+    .nav-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover:not(:disabled) { color: var(--gold); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.25; cursor: default; }
+
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      flex: 1;
+    }
+
+    .page-indicator {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      opacity: 0.7;
+    }
+
+    .font-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .font-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      cursor: pointer;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      transition: color 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .font-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .theme-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      padding: 0.4rem 0.7rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .theme-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .toc-link {
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      text-decoration: none;
+      opacity: 0.6;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    .toc-link:hover { opacity: 1; color: var(--gold); }
+
+    /* tap zones for mobile */
+    .tap-prev, .tap-next {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      z-index: 50;
+      cursor: pointer;
+      opacity: 0;
+    }
+    .tap-prev { left: 0; }
+    .tap-next { right: 0; }
+  </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<div id="para-pool">
+
+  <p class="entry-head">Watcher's Observation — Entry: 0028 — The Best Route Is Sometimes the Least-Traveled Route</p>
+
+  <p>There are times I watch these adventurers—or heroes, or whatever appellative you wish to give them—and I find myself lost in the confounding mishmash of their number.</p>
+
+  <p>The addition of the Songweaver has proven not nearly as troublesome as I expected… unless he strays too close to Sune. In those moments, Ranessa growls, and the Terra beneath Horatio's feet undulates in quiet warning.</p>
+
+  <p>It's endearing, really—if one chooses to look at it that way.</p>
+
+  <p>Loving, caring for, and protecting Sune is easy for her. What risk is there, truly?</p>
+
+  <p>There is genuine camaraderie between them, that familiar dynamic of a younger sister looking up to an elder—who just so happens to be a predatorially monstrous Ursa.</p>
+
+  <p>Sune, for her part, cherishes the attention. The doting. The feeling that she matters.</p>
+
+  <p>The girl must understand something intrinsically important about the druid:</p>
+
+  <p>She is important to Ranessa. She is love—without condition. No caveats. No hesitation. Nothing in the girl inspires fear in her. While that may prove a tactical error, I do not see it weakening their bond.</p>
+
+  <p>What I see instead is a woman who has longed to love—and be loved—finally receiving what she has so desperately craved for years.</p>
+
+  <p>Woe to the fool who dares come between them.</p>
+
+  <p class="marginalia"><strong>Watcher's Marginalia:</strong> She is interested in Horatio. Like someone discovering a new science. Your obstacle is… triplicate. Emotionally speaking. Bastions of protection: A fearsome Thálmen. A druid who would sooner rend you beneath the sea. The most dangerous man in all of Rivendawn. Oh—and the cat. Do not forget the cat. She has already cuddled—and marked—the girl. Actually, Horatio… fear the cat more. She does not fall for the tricks of Songweavers. Nor do I.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p>There had been a quiet tension for the past few hours, and Greighton didn't mind it.</p>
+
+  <p>It allowed him to take the lead.</p>
+
+  <p>He listened to nature.</p>
+
+  <p>The wind.</p>
+
+  <p>The animals.</p>
+
+  <p>There was nothing for kilometers in any direction.</p>
+
+  <p>That wasn't quite true—but nothing even Sune, freshly armed with her first Vanguard blades, couldn't handle.</p>
+
+  <p>The old, crotchety Kardurin—Captain Sundering—had always said, "Practice ain't makin' ya perfect, boy. Practice makes permanent. Do it right."</p>
+
+  <p>A smile slipped past Greighton's carefully constructed neutrality.</p>
+
+  <p>A grunt. A thud.</p>
+
+  <p>He turned to his right. Gunnar's hands were already moving.</p>
+
+  <p>What has you smiling?</p>
+
+  <p>"I was," he began, "thinking about Captain Sundering—"</p>
+
+  <p>Gunnar cut him off with a quick series of flickering signs.</p>
+
+  <p>Greighton laughed—deep and unguarded—as he bowed his head slightly.</p>
+
+  <p>"Yes. Practice," he said, a grin tugging at his mouth. "Exactly."</p>
+
+  <p>The moment passed.</p>
+
+  <p>Both men returned to their roles.</p>
+
+  <p>Grey was point—always point.</p>
+
+  <p>Gunnar was artillery, in the basest sense of the word.</p>
+
+  <p>They moved in a deliberate pattern: north to west, west to south, then cutting back due north.</p>
+
+  <p>Thabius had squirreled himself away in an old rock quarry, long since mined out by the Drauven and the Kardurin. It made for a perfect refuge for a powerful Resonant caster who wished to be left alone.</p>
+
+  <p>Most would assume the high ground gave them the advantage over Thabius.</p>
+
+  <p>It never did.</p>
+
+  <p>Aeris never killed anyone—or so Thabius always claimed.</p>
+
+  <p>It wasn't the wind that killed you.</p>
+
+  <p>It was the sudden stop.</p>
+
+  <p>Greighton exhaled softly, another faint smile touching his lips.</p>
+
+  <p>He missed that crazy man.</p>
+
+  <p>The humidity began to lift as the sun settled against his back. That was when Greighton shifted the group to a mostly westerly path—altering their route just enough to complicate tracking. Not impossible, but difficult. Enough to cost a pursuer time.</p>
+
+  <p>"Grey…"</p>
+
+  <p>The man paused, turning toward the voice.</p>
+
+  <p>"Sune…" he replied, matching her gentle tone.</p>
+
+  <p>"Who is Thabius?"</p>
+
+  <p>Ten hours of walking—and only now she asked.</p>
+
+  <p>He was, in the most honest sense, proud of her. Not surprised—but proud.</p>
+
+  <p>He'd been the same way once. Thinking. Turning something over and over in his mind until it finally broke—and he asked.</p>
+
+  <p>"Tell you what, Sune," he said, resuming his stride. His head inclined slightly—just enough to signal Gunnar to hang back. A tactical adjustment. The big man nodded, falling into place.</p>
+
+  <p>"If you can guide us to a good campsite, near the river, I'll have Horatio sing us Midnight Morning."</p>
+
+  <p>He glanced over his shoulder.</p>
+
+  <p>Even through the broken light of the forest canopy, the look on Horatio's face was clear. It was good to see—human. Grounded.</p>
+
+  <p>Greighton watched the Songweaver's nod. There was weight behind it—quiet gravitas. It only reaffirmed Elurien's choice.</p>
+
+  <p>"Is that—"</p>
+
+  <p>"Silence, until you get us to the river and find a campsite."</p>
+
+  <p>"But—"</p>
+
+  <p>He glared.</p>
+
+  <p>She stopped.</p>
+
+  <p>A nod from him, and he motioned her forward.</p>
+
+  <p>"Jerk," Ranessa muttered as she traded positions with Gunnar.</p>
+
+  <p>But the way she said it—</p>
+
+  <p>That was a compliment.</p>
+
+  <p>He took it as such.</p>
+
+  <p>"You smell nice," he said with a wicked grin—two can play this game.</p>
+
+  <p>She froze mid-step, giving him just enough space to fall in behind Sune and observe.</p>
+
+  <p>The first test. Of many.</p>
+
+  <p>A few times, he gave a sharp whistle—pulling her pace back. Inexperience killed in this role.</p>
+
+  <p>Worse than inexperience?</p>
+
+  <p>Impatience.</p>
+
+  <p>It didn't take her long to adjust. A few times, she even called for silent stops—reading ahead, spotting feral movement in the brush. Nothing they couldn't handle.</p>
+
+  <p>Still—correct instincts.</p>
+
+  <p>The sound of rushing water grew louder. She was doing well.</p>
+
+  <p>Then she stopped, glancing over her shoulder—head tilted, strawberry-blonde hair slipping forward.</p>
+
+  <p>"Yes, Sune?" he whispered.</p>
+
+  <p>"That boar," she said quietly. "Kill it. We can cook it."</p>
+
+  <p>He paused.</p>
+
+  <p>Brows knit, just slightly—about to question—</p>
+
+  <p>"Grey," she added, cutting him off before he spoke, "why drain our stores when there's ample protein snorting for truffles behind us?"</p>
+
+  <p>Ranessa cleared her throat.</p>
+
+  <p>A poor attempt to hide her laughter.</p>
+
+  <p>She failed.</p>
+
+  <p>"Very well," Greighton said. "Who should take it?"</p>
+
+  <p>She was on point, after all.</p>
+
+  <p>"You. Find me at camp."</p>
+
+  <p>That was all.</p>
+
+  <p>He grinned, nodding once as he stepped back—only to stop short at Ranessa's smirking face.</p>
+
+  <p>"I may smell good," she said, slipping past him with a wink, "but the boss just got out-bossed."</p>
+
+  <p>She ducked under his dropping jaw, laughing as she moved on.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p class="entry-head">Watcher's Observation — Entry: 0029 — What Lies Ahead, No One Knows, but at Least Their Tummies Will Be Full</p>
+
+  <p>By the time Greighton returned with the boar, the others had established camp in a rather defensible position—clear ingress and egress points, well chosen.</p>
+
+  <p>By all accounts—and Greighton's sharp nod—she'd done well. Even ordered him about.</p>
+
+  <p>However, it was Greighton who gave the final command as he dropped the dead boar at Sune's feet.</p>
+
+  <p>Prepare it for dinner.</p>
+
+  <p>She nearly screwed her face up in disgust, but she—and I—both knew he wasn't joking.</p>
+
+  <p>Fortunately, her "big sister" stepped in, offering to show her how it's done.</p>
+
+  <p>With a satisfied nod, Greighton found a place to sit—enjoying the quiet that came from removing both Sune and Ranessa from his immediate vicinity.</p>
+
+  <p>Because if anything was obvious on Horatio's face…</p>
+
+  <p>The young, half-elven Songweaver was not about to say a damn thing to Greighton as he settled in for a quick nap.</p>
+
+  <p class="marginalia"><strong>Watcher's Marginalia:</strong> Telling her what to do. Letting her accept help when it's offered. He was teaching her—in the most realistic sense possible. One cannot always rely on oneself. But neither can one rely entirely on others. The paradox of self-sufficiency is this: It is learned through others… so that one may stand alone. Sune is smart. Greighton is experienced. And Ranessa… Ranessa is content.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p>Horatio sat on the rock furthest from the others. The weight of this mission was unlike any before it.</p>
+
+  <p>With a fair-breezed nonchalance, he had always walked through his assignments—accomplishing the impossible as if it were expected.</p>
+
+  <p>But now, he found himself wondering…</p>
+
+  <p>How does one perform the impossible… with the impossible?</p>
+
+  <p>It was overwhelming.</p>
+
+  <p>A beautiful woman with prismatic eyes and a shy smile—one that silenced the suave troubadour within, but he would carry forth.</p>
+
+  <p>The other woman—dangerous, frightening—also Sune's closest ally. One who would not hesitate to tear him apart.</p>
+
+  <p>The Thálmen? Silent. Communicating only through hand-speech with Greighton.</p>
+
+  <p>None of them would be fooled by the tricks of his kind.</p>
+
+  <p>And that made Horatio feel… grateful.</p>
+
+  <p>He did not have to pretend. Did not have to perform for a cause that carried vague wording and even more distilled words of ambiguous orders.</p>
+
+  <p>This was something more than balance.</p>
+
+  <p>This was a choice.</p>
+
+  <p>A choice that defied the Owls' long-held decree—that neutrality, balance, and consistency existed beyond good and evil. That they must remain untouched.</p>
+
+  <p>As their edicts proclaimed:</p>
+
+  <p>For only in the balance—free of the love of fame and the hunger for power—may one preserve humility… and disarm the self.</p>
+
+  <p>Rarely was he caught off guard.</p>
+
+  <p>And today—tonight—whenever it was, wherever they were—this would not be the place.</p>
+
+  <p>The hand that came to rest on his shoulder was Greighton's. He knew it immediately. The man was no longer in his periphery, and everyone else remained exactly where they had been.</p>
+
+  <p>And in the most honest sense—no one would be sneaking up on this group.</p>
+
+  <p>By deduction, it had to be Grey.</p>
+
+  <p>"Time to play, Master Greighton?"</p>
+
+  <p>"Grey," the voice replied—distant, but not cold.</p>
+
+  <p>"Certainly," Horatio said, glancing over his shoulder at the calm-faced man.</p>
+
+  <p>With a small smile, he added, "Grey."</p>
+
+  <p>A satisfied nod followed.</p>
+
+  <p>There was no charlatanry here—no smoothing of edges, no debonair posturing meant to soothe the evening air.</p>
+
+  <p>No.</p>
+
+  <p>Horatio took quiet satisfaction in that nod. No approval. No disapproval.</p>
+
+  <p>The man simply was.</p>
+
+  <p>And that was enough.</p>
+
+  <p>He leaned down to his bag and drew out his cherry-stained wooden lute. His fingers moved deftly—plucking, then strumming—adjusting the pegs with practiced ease. A final, careful pass across the strings.</p>
+
+  <p>Satisfied.</p>
+
+  <p>He rose and moved toward the fire.</p>
+
+  <p>He didn't need to perform for them.</p>
+
+  <p>But he would.</p>
+
+  <p>They needed to see that Elurien Vael'Astra had sent him for a reason.</p>
+
+  <p>What that reason was…</p>
+
+  <p>He hadn't a damned idea.</p>
+
+  <p>His fingertips began to dance across the strings.</p>
+
+  <p>The sound carried—soft at first—until even the forest seemed to still.</p>
+
+  <p>And when the moment was his—</p>
+
+  <p>The fire, the eyes, the silence—</p>
+
+  <p>He began to sing.</p>
+
+  <p class="lyric">He came before the ash, where the silence burns slow</p>
+  <p class="lyric">Trained by The Song – to let Monsters go</p>
+
+  <p>His fingers tenderly strummed and then plucked the lute.</p>
+
+  <p>His eyelids fluttered as if they were the metronome to his rendition of Midnight's Morning. Inhaling deeply, he continued.</p>
+
+  <p class="lyric">Taught by a flame that the world couldn't cage</p>
+  <p class="lyric">Shadow and sword—he was born from the hidden rage</p>
+  <p class="lyric">But him? The one with a name that eschewed laurels and fame</p>
+  <p class="lyric">They called him a myth, but he carved you from stone</p>
+  <p class="lyric">Because of his sins, he feared to be alone</p>
+  <p class="lyric">A whisper of war in a world overthrown</p>
+  <p class="lyric">No one believed till the bodies were gone</p>
+  <p class="lyric">Then he rose, dusting the ash from his hands</p>
+  <p class="lyric">And gone were they—alone was he, still humming his song</p>
+  <p class="lyric">He knelt in the ruin of what he had done—</p>
+  <p class="lyric">The Flame That Refused had finally burned</p>
+  <p class="lyric">So he buried the name that the world tried to keep</p>
+  <p class="lyric">And walked into silence too heavy for sleep</p>
+
+  <p>He felt alone—a sensation that the older 'Weavers would talk about. They called it 'The-One'. It was the solo performance that takes up residence in your heart.</p>
+
+  <p>It exists for a sole purpose.</p>
+
+  <p>The humility of their performance.</p>
+
+  <p>His eyes opened—and there was only one set he cared to find.</p>
+
+  <p>And he did.</p>
+
+  <p>Her smile was tempered, thin, but it was there—as real as the strings beneath his fingertips.</p>
+
+  <p>As he closed his eyes once more, the vision of Ranessa's smile bound itself to that memory.</p>
+
+  <p class="lyric">But then, beneath a wide night he found you—</p>
+  <p class="lyric">The hunter he made</p>
+  <p class="lyric">The wrath held within</p>
+  <p class="lyric">A Cradle's hidden vengeance</p>
+  <p class="lyric">A man discarded, reformed into shadow's repentance</p>
+  <p class="lyric">For those who would own sin</p>
+
+  <p>A soft inhalation was taken before he said with tenderness in his voice, "Oh."</p>
+
+  <p>His voice rose while driving into the final verses of the song:</p>
+
+  <p class="lyric">This is the tale they won't write anymore—</p>
+  <p class="lyric">The serenade of vengeance born from a tender breath…</p>
+  <p class="lyric">He came like a fire that forgot how to die</p>
+  <p class="lyric">Turned all their echoes into ash in the sky</p>
+  <p class="lyric">One word from him and the world held its breath</p>
+  <p class="lyric">Twenty-four thousand gone—no blade, only death</p>
+  <p class="lyric">They whispered his name, but he silenced the sound</p>
+  <p class="lyric">Vanished like thunder retreating underground</p>
+  <p class="lyric">He gave you his truth, and he vanished once more</p>
+  <p class="lyric">But the song that he left?</p>
+  <p class="lyric">It became your war.</p>
+  <p class="lyric">You are the blade that he forged in the dark—</p>
+  <p class="lyric">quenched in his silence, struck through by the spark</p>
+  <p class="lyric">You move like judgment disguised as a man—</p>
+  <p class="lyric">The promise he made</p>
+  <p class="lyric">The blood on your hands</p>
+
+  <p>Another gentle draw of the cool night's air.</p>
+
+  <p>A softly pressed, "Oh," escaped his lips before his fingers sped up on the lute, the finish driving through his voice—his heart—his soul—all of him.</p>
+
+  <p class="lyric">This is the verse they won't dare to restore—</p>
+  <p class="lyric">The serenade born from Folly's War…</p>
+  <p class="lyric">He's still out there—</p>
+  <p class="lyric">Where the stars don't speak</p>
+  <p class="lyric">Where the Song can't scream</p>
+  <p class="lyric">Where the gods don't peek</p>
+  <p class="lyric">He waits…</p>
+  <p class="lyric">for a voice that's never lied.</p>
+  <p class="lyric">You are the blade that he forged in the flame</p>
+  <p class="lyric">The ghost in the fire who remembers his name</p>
+  <p class="lyric">You walk like thunder through sorrow and sin—</p>
+  <p class="lyric">The reckoning song</p>
+  <p class="lyric">The silence within</p>
+
+  <p>Opening his eyes gently, a final, "Oh," escaped before finishing.</p>
+
+  <p class="lyric">This is the truth that will shatter the lore—</p>
+  <p class="lyric">The serenade born from Folly's War…</p>
+
+  <p>He stood there, the sound of the lute fading into the darkening sky. The echo hovered over the flickering fire for a moment before vanishing.</p>
+
+  <p>No one moved or reacted; they all sat in silence.</p>
+
+  <p>Ranessa rose, the back of her hand swiping at her eyes.</p>
+
+  <p>"Okay," the druid said in a gruff voice that sent a shiver of unease through Horatio.</p>
+
+  <p>"He can stay," she finished, before vanishing into the darkened tree line.</p>
+
+  <p>He smiled, and then the others did too.</p>
+
+  <p>Greighton and Gunnar both smiled—their nods short and clipped—seeming to be as much affirmation as Horatio ever needed.</p>
+
+  <p>"Ranessa, wait! I got questions!" Sune cried out, chasing after the druid.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p class="entry-head">Watcher's Observation — Entry: 0030 — …</p>
+
+  <p>I have never both liked and loathed a being so much as I do Horatio right now.</p>
+
+  <p>I loathe Thabius—always will—as unavoidable as a sunrise. But for Horatio to humanize that moment with his voice… the adoption of Greighton, the learning of his powers as an Auris—</p>
+
+  <p>While it is not spelled out, while it is not plainly sung that Greighton learned to control all Resonant Paths—</p>
+
+  <p>I.</p>
+
+  <p>Was.</p>
+
+  <p>There.</p>
+
+  <p>The fool, old man taught him—but that same fool has carried the regret for nearly a millennium.</p>
+
+  <p>And I have watched him—grow, shrivel, and grow again.</p>
+
+  <p>Much like I suspect I will have to do with Horatio.</p>
+
+  <p>As golden as his skin is, his voice is richer still.</p>
+
+  <p class="marginalia"><strong>Watcher's Marginalia:</strong> Sune has questions. She is going to be disappointed—because so does Ranessa. And then, the two most important women in Greighton's life will return. They will demand answers. And I will have extra vellum at the ready… and an eager quill in hand.</p>
+
+</div>
+
+<!-- Mobile tap zones -->
+<div class="tap-prev" id="tap-prev"></div>
+<div class="tap-next" id="tap-next"></div>
+
+<div class="reader">
+
+  <div class="chapter-header">
+    <p class="chapter-label">Chapter X</p>
+    <p class="chapter-title">On the Road… Again</p>
+    <p class="chapter-sub">Resonant Echoes</p>
+  </div>
+
+  <div class="text-area" id="text-area">
+    <div id="page-content"></div>
+  </div>
+
+  <nav class="nav-bar">
+    <button class="nav-btn" id="prev-btn" onclick="prevPage()" disabled>&#8592; Prev</button>
+
+    <div class="nav-center">
+      <span class="page-indicator" id="page-indicator">Page 1</span>
+      <div class="font-controls">
+        <button class="font-btn" onclick="adjustFont(-1)" title="Smaller">A&#8331;</button>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">&#9790; Dark</button>
+        <button class="font-btn" onclick="adjustFont(1)"  title="Larger">A&#8314;</button>
+      </div>
+      <a class="toc-link" href="toc.html">&#8617; Contents</a>
+    </div>
+
+    <button class="nav-btn" id="next-btn" onclick="nextPage()">Next &#8594;</button>
+  </nav>
+
+</div>
+
+<script>
+  // ── Token guard ──
+  (function() {
+    const token = sessionStorage.getItem('re_token');
+    if (!token) {
+      window.location.href = 'https://jpcauthor.github.io/resonant-echoes/login.html';
+    }
+  })();
+
+  // ── Theme ──
+  const body     = document.body;
+  const themeBtn = document.getElementById('theme-btn');
+  const saved    = localStorage.getItem('re_theme') || 'dark';
+
+  if (saved === 'dark') { body.classList.add('dark'); themeBtn.textContent = '☀ Light'; }
+  else { themeBtn.textContent = '☽ Dark'; }
+
+  function toggleTheme() {
+    const isDark = body.classList.toggle('dark');
+    themeBtn.textContent = isDark ? '☀ Light' : '☽ Dark';
+    localStorage.setItem('re_theme', isDark ? 'dark' : 'light');
+    buildPages();
+  }
+
+  // ── Font size ──
+  let fontSize = parseFloat(localStorage.getItem('re_fontsize') || '1.15');
+  document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+
+  function adjustFont(dir) {
+    fontSize = Math.min(1.6, Math.max(0.9, fontSize + dir * 0.1));
+    localStorage.setItem('re_fontsize', fontSize);
+    document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+    buildPages();
+  }
+
+  // ── Pagination engine ──
+  let pages       = [];
+  let currentPage = 0;
+
+  function buildPages() {
+    const pool    = document.getElementById('para-pool');
+    const area    = document.getElementById('text-area');
+    const content = document.getElementById('page-content');
+    const paras   = Array.from(pool.children);
+    const areaH   = area.clientHeight;
+
+    pages = [];
+    let currentGroup = [];
+
+    const testDiv = document.createElement('div');
+    testDiv.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      visibility: hidden;
+      pointer-events: none;
+      width: ${content.clientWidth}px;
+      font-size: ${fontSize}rem;
+      line-height: 1.85;
+      font-family: 'EB Garamond', Georgia, serif;
+      padding: 0;
+      margin: 0;
+    `;
+    area.appendChild(testDiv);
+
+    const threshold = areaH * 0.82;
+
+    for (const para of paras) {
+      currentGroup.push(para);
+      testDiv.innerHTML = currentGroup.map(p => p.outerHTML).join('');
+
+      if (testDiv.offsetHeight > threshold && currentGroup.length > 1) {
+        currentGroup.pop();
+        pages.push([...currentGroup]);
+        currentGroup = [para];
+        testDiv.innerHTML = para.outerHTML;
+      }
+    }
+
+    if (currentGroup.length) pages.push([...currentGroup]);
+    area.removeChild(testDiv);
+
+    if (currentPage >= pages.length) currentPage = pages.length - 1;
+    renderPage();
+  }
+
+  function renderPage() {
+    const content = document.getElementById('page-content');
+    content.style.animation = 'none';
+    content.offsetHeight;
+    content.style.animation = '';
+    content.innerHTML = pages[currentPage]
+      ? pages[currentPage].map(p => p.outerHTML).join('')
+      : '';
+
+    document.getElementById('page-indicator').textContent =
+      `Page ${currentPage + 1} of ${pages.length}`;
+    document.getElementById('prev-btn').disabled = currentPage === 0;
+    document.getElementById('next-btn').disabled = currentPage === pages.length - 1;
+  }
+
+  function nextPage() {
+    if (currentPage < pages.length - 1) { currentPage++; renderPage(); }
+  }
+
+  function prevPage() {
+    if (currentPage > 0) { currentPage--; renderPage(); }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextPage();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevPage();
+  });
+
+  document.getElementById('tap-next').addEventListener('click', nextPage);
+  document.getElementById('tap-prev').addEventListener('click', prevPage);
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(buildPages, 200);
+  });
+
+  window.addEventListener('load', buildPages);
+
+  // ── Starfield ──
+  const canvas = document.getElementById('stars');
+  const ctx    = canvas.getContext('2d');
+  let W, H, stars = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function initStars(n = 180) {
+    stars = Array.from({ length: n }, () => ({
+      x:  Math.random() * W,
+      y:  Math.random() * H,
+      r:  Math.random() * 1.1 + 0.2,
+      a:  Math.random(),
+      da: (Math.random() - 0.5) * 0.003
+    }));
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      s.a += s.da;
+      if (s.a < 0.05 || s.a > 1) s.da *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(245,236,215,${s.a.toFixed(2)})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(drawStars);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize(); initStars(); drawStars();
+</script>
+</body>
+</html>
