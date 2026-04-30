@@ -36,17 +36,7 @@
       --rule:     #8a6422;
     }
 
-    /* starfield */
-    #stars {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.6s;
-    }
-    body.dark #stars { opacity: 1; }
-
+  
     /* ── Page container ── */
     .reader {
       position: relative;
@@ -790,41 +780,6 @@ Greighton Lastlight. Ranessa Barkroot. Gunnar. Sune. History should be afraid—
 
   window.addEventListener('load', buildPages);
 
-  // ── Starfield ──
-  const canvas = document.getElementById('stars');
-  const ctx    = canvas.getContext('2d');
-  let W, H, stars = [];
-
-  function resize() {
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
-
-  function initStars(n = 180) {
-    stars = Array.from({ length: n }, () => ({
-      x:  Math.random() * W,
-      y:  Math.random() * H,
-      r:  Math.random() * 1.1 + 0.2,
-      a:  Math.random(),
-      da: (Math.random() - 0.5) * 0.003
-    }));
-  }
-
-  function drawStars() {
-    ctx.clearRect(0, 0, W, H);
-    for (const s of stars) {
-      s.a += s.da;
-      if (s.a < 0.05 || s.a > 1) s.da *= -1;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(245,236,215,${s.a.toFixed(2)})`;
-      ctx.fill();
-    }
-    requestAnimationFrame(drawStars);
-  }
-
-  window.addEventListener('resize', () => { resize(); initStars(); });
-  resize(); initStars(); drawStars();
 </script>
 </body>
 </html>
