@@ -36,17 +36,6 @@
       --rule:     #8a6422;
     }
 
-    /* starfield */
-    #stars {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.6s;
-    }
-    body.dark #stars { opacity: 1; }
-
     /* ── Page container ── */
     .reader {
       position: relative;
@@ -277,7 +266,6 @@
 </head>
 <body>
 
-<canvas id="stars"></canvas>
 
 <div id="para-pool">
 
@@ -909,15 +897,7 @@
 
   window.addEventListener('load', buildPages);
 
-  // ── Starfield ──
-  const canvas = document.getElementById('stars');
-  const ctx    = canvas.getContext('2d');
-  let W, H, stars = [];
 
-  function resize() {
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
 
   function initStars(n = 180) {
     stars = Array.from({ length: n }, () => ({
