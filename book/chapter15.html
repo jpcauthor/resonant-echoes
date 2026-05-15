@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Resonant Echoes — Chapter 15</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:     #c9973a;
+      --gold-dim: #8a6422;
+    }
+
+    body {
+      --bg:       #f5ecd7;
+      --bg-2:     #ede0c4;
+      --text:     #2a1f0a;
+      --text-sub: #5a3e1b;
+      --rule:     #8a6422;
+      background: var(--bg);
+      font-family: 'EB Garamond', Georgia, serif;
+      color: var(--text);
+      transition: background 0.4s, color 0.4s;
+      overflow: hidden;
+    }
+
+    body.dark {
+      --bg:       #1a1208;
+      --bg-2:     #241a0c;
+      --text:     #f5ecd7;
+      --text-sub: #c9973a;
+      --rule:     #8a6422;
+    }
+
+    /* ── Page container ── */
+    .reader {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100dvh;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ── Chapter header ── */
+    .chapter-header {
+      padding: 2rem 0 1.2rem;
+      text-align: center;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(138,100,34,0.2);
+    }
+
+    .chapter-label {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.58rem, 1.5vw, 0.7rem);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+    }
+
+    .chapter-title {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      color: var(--gold);
+      margin-top: 0.3rem;
+      line-height: 1.3;
+    }
+
+    .chapter-sub {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.55rem, 1.3vw, 0.65rem);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      margin-top: 0.4rem;
+      opacity: 0.7;
+    }
+
+    /* ── Text area ── */
+    .text-area {
+      overflow: hidden;
+      position: relative;
+      padding: 1.5rem 0;
+    }
+
+    #para-pool { display: none; }
+
+    #page-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      animation: pageFade 0.4s ease;
+    }
+
+    @keyframes pageFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #page-content p {
+      font-size: var(--font-size, 1.15rem);
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 1em;
+    }
+
+    #page-content p:last-child { margin-bottom: 0; }
+
+    #page-content p.entry-head {
+      font-family: 'Cinzel', serif;
+      font-size: calc(var(--font-size, 1.15rem) * 0.72);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      font-style: normal;
+      margin-bottom: 1.4em;
+      line-height: 1.6;
+    }
+
+    #page-content p.marginalia {
+      border-left: 2px solid var(--gold-dim);
+      padding-left: 1rem;
+      font-style: italic;
+      color: var(--text-sub);
+      margin-top: 0.5em;
+    }
+
+    #page-content p.marginalia strong {
+      font-style: normal;
+    }
+
+    #page-content p.scene-break {
+      text-align: center;
+      color: var(--gold-dim);
+      font-style: normal;
+      letter-spacing: 0.5em;
+      margin: 0.5em 0;
+    }
+
+    #page-content p.lyric {
+      text-align: center;
+      font-style: italic;
+      color: var(--text);
+      margin-bottom: 0.4em;
+    }
+
+    /* ── Bottom nav ── */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 0 1.2rem;
+      border-top: 1px solid rgba(138,100,34,0.2);
+      gap: 1rem;
+      background: var(--bg);
+    }
+
+    .nav-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover:not(:disabled) { color: var(--gold); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.25; cursor: default; }
+
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      flex: 1;
+    }
+
+    .page-indicator {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      opacity: 0.7;
+    }
+
+    .font-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .font-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      cursor: pointer;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      transition: color 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .font-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .theme-btn {
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      color: var(--text-sub);
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      padding: 0.4rem 0.7rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .theme-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .toc-link {
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      text-decoration: none;
+      opacity: 0.6;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    .toc-link:hover { opacity: 1; color: var(--gold); }
+
+    /* tap zones for mobile */
+    .tap-prev, .tap-next {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      z-index: 50;
+      cursor: pointer;
+      opacity: 0;
+    }
+    .tap-prev { left: 0; }
+    .tap-next { right: 0; }
+  </style>
+</head>
+<body>
+
+<div id="para-pool">
+
+  <p class="entry-head">Watcher's Observation — Entry: 0042 — Good Morning</p>
+
+  <p>They did not move.</p>
+
+  <p>Ranessa lay behind Greighton and held him as if her arms were the only thing keeping the man securely planted atop Terra.</p>
+
+  <p>Ranessa slept undisturbed. She had valiantly fought to keep herself awake, but the proximity to Grey and their location? It was a losing battle.</p>
+
+  <p>He stirred first, and if I would allow myself a moment of entertainment—he provided it.</p>
+
+  <p>His eyes flew open, that look of uncertainty one normally has after too long a night at the tavern and more ales than one can count. It is that familiar look of panic.</p>
+
+  <p>But then, the unexpected happened.</p>
+
+  <p>The man who moved with silent stealth and pressed intentions wriggled himself into the druid's embrace and let his eyes close—an even and steady breathing soon followed.</p>
+
+  <p>And there, in the peaceful quiet respite of slumber, the two lay.</p>
+
+  <p class="marginalia"><strong>Watcher's Marginalia:</strong> Greighton woke when the twig snapped. I watched as his eyes widened as he took in the sight of the majestic ram and its heavy horns bowing its head into the stream for a sip of water. When the ram lifted its head, heavy horns inclining lightly to the side, it said, "Good morning, Greighton Lastlight."</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p>Gently, he grasped Ranessa's warm hands and arms and freed himself from their grasp. Immediately, he missed them, missed her.</p>
+
+  <p>He rose to his feet and padded quietly over to the rolling stream where he knelt, cupped his hands, and took several sips of the cold water. The refreshing sensation started first as it rolled down his throat, but then came a full envelopment of mind and body.</p>
+
+  <p>When he felt sated, he settled onto his backside with a sigh. The emptiness of being devoid of the Song and its harmonics was gone. He wasn't certain how the Song had returned, but for once in his life he was in an accepting mood.</p>
+
+  <p>"Are you well rested, Greighton?" the ram queried.</p>
+
+  <p>"I am, and I surmise I've you to thank for…" he motioned about with his left hand, his right hand savoring the soft sensation of the grass and Terra beneath his palm. "All of this?"</p>
+
+  <p>"No, Greighton, this…" the ram cast a gaze, looking left and then to the right. "This is beyond me, beyond everything. Your needs were greater than what existed, and those needs were answered."</p>
+
+  <p>The ram huffed as it came to rest, lowering itself comfortably to the ground as a rough exhale escaped from its snout.</p>
+
+  <p>"Who asked for this?"</p>
+
+  <p>"No one, Greighton. It was need that was seen, and a respite that was provided. You'll have more questions, but I cannot and refuse to, answer any further ones. Now you must listen to me."</p>
+
+  <p>Very rarely had anyone or anything spoken to him in this manner, but Grey felt as if this time his reluctance to be on the receiving end of instruction was a fool's errand—one he would not participate in.</p>
+
+  <p>"You have learned patience and wisdom as the years have progressed, much different than the impetuous boy in the fields outside the Crimson Citadel," the ram offered, as if summoning an old memory—a familiar one.</p>
+
+  <p>"I have," he admitted.</p>
+
+  <p>"No longer chasing shadow beasts along the Northern Rivens?"</p>
+
+  <p>He froze.</p>
+
+  <p>"No," came the reluctant answer, the memory surging back.</p>
+
+  <p>He was maybe twelve and had been under the Captain of the Vanguard Redoubt's tutelage. It was supposed to be a simple request: venture north from the Citadel, scout the paths ahead, and report back.</p>
+
+  <p>But like all things in his life, something caught his attention, and that was a roving group of Shadow Cabalists making their way toward a hunting lodge.</p>
+
+  <p>"You still suffer from that hero complex, though, no?" the ram asked, its attention focused across the stream.</p>
+
+  <p>"I guess," he admitted.</p>
+
+  <p>"Like the hunting lodge?"</p>
+
+  <p>A nod in the affirmative.</p>
+
+  <p>"What did you learn?"</p>
+
+  <p>"That not all things as they present themselves are the truth, and not all truths need be embraced."</p>
+
+  <p>The ram huffed, but its head bowed slowly up and down in acknowledgment.</p>
+
+  <p>Once more, his memory circled back as he stalked the cabalists, ready to spring his own ambush. The four men, in their black robes and even blacker auras, walked into one of the cabins—</p>
+
+  <p>Only to return as normal hunters, wearing the garb of men who hunted the woods and sold their meat to the Citadel. It was a lesson that evil was oftentimes not wrapped in inky blackness, and that the truth of the matter was hatred and power could color a good soul dark while leaving the outside pristine.</p>
+
+  <p>"They had…" the ram began.</p>
+
+  <p>"Children, spouses, and darkness in their hearts…"</p>
+
+  <p>"And what else did they almost have?"</p>
+
+  <p>"Me," he said, remembering watching the men stroll out of the cabin in their hunter's garb, and then all things going black—thanks to the butt end of a spear introduced to the base of his skull.</p>
+
+  <p>"Was it you?"</p>
+
+  <p>The ram let a baritone laugh escape from its throat.</p>
+
+  <p>"Who saved you?"</p>
+
+  <p>"Mhm," he muttered.</p>
+
+  <p>"No, that was your parents." A deep rumbling chuckle escaped as the ram's snout wrinkled. "They and the Captain were the ones that rescued you."</p>
+
+  <p>"Why didn't they tell me?" he asked.</p>
+
+  <p>The ram seemed to raise a brow, as if ascribing incredulity to his inquiry, but Grey wanted to know. It was a mystery, if not some supernatural event that saved him, but his adoptive parents and the Captain—why didn't they let him know?</p>
+
+  <p>He thought aloud, "Because who did it doesn't matter, it was what was done that mattered…"</p>
+
+  <p>"And that is why you are who you are today, Greighton," was the simple observation. "That is why fate and life have conspired to put the girl, Sune, under your care, and that is why the blessing that is the druid is still here with you, not because she has to…"</p>
+
+  <p>"Because she wants to," Greighton finished, looking over his shoulder to the slumbering Ranessa.</p>
+
+  <p>The silence passed between them for an indeterminate amount of time. The soft tranquility began to feel as if it was closing in. The tree lines seemed closer, the water rushed slower, and the comfort of the lush foliage and grass seemed to lose its luster.</p>
+
+  <p>"This is the only level of help that you'll get like this ever again," the ram said as it took to standing. "You are one man against an army of darkness, protecting a girl who is more than even the sages and scribes would identify, and all that fate has brought you is more questions and her…"</p>
+
+  <p>Rising, he followed the gaze to where Ranessa slept, and his attention once more settled on the ram, its body becoming translucent, as if the Song were drawing it back toward the core of the symphony—and his own Resonance began to mourn the impending loss of the ram's presence.</p>
+
+  <p>"Much lays at your feet, but if you want to know who saved you in the Northern Wilds and Rivens? It was no one. It was love, and if you can open your eyes, you might see that love…"</p>
+
+  <p>The ram began to shimmer, slowly dissipating from view—starting at its hooves and haunches until only its head remained.</p>
+
+  <p>"…has found you, Greighton. Don't run away from this."</p>
+
+  <p>And like that, it was all gone.</p>
+
+  <p>The peace, the security of where he stood, was now replaced by true nature: craggy features, trees that cast shadows from their boughs, scratchy Terra beneath his feet, and a set of curious eyes looking up at him.</p>
+
+  <p>Having failed miserably, he greeted her. "Good Morning, 'Nessa."</p>
+
+  <p>She stared at him, her lips turning up in the tiniest of smiles.</p>
+
+  <p>"How much did you hear?" he asked, uncertain where the weakness in his voice came from.</p>
+
+  <p>"All of it," she declared, sitting up with a smile.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p class="entry-head">Watcher's Observation — Entry: 0043 — A Lack of Attention to Detail…</p>
+
+  <p>This entire thing.</p>
+
+  <p>Meeting Sune.</p>
+
+  <p>The council chamber.</p>
+
+  <p>The Councilor Prime.</p>
+
+  <p>Ranessa.</p>
+
+  <p>Greighton.</p>
+
+  <p>Horatio.</p>
+
+  <p>And of course, Gunnar.</p>
+
+  <p>It has taught me something invaluable.</p>
+
+  <p>That if he's not trying to kill someone or carrying out a mission with clear goals—Greighton is a fool.</p>
+
+  <p>A lovestruck fool who stands before a woman who would destroy Rivendawn in his name.</p>
+
+  <p>And he just sits there with a stupefied expression, trying to play it tactical.</p>
+
+  <p class="marginalia"><strong>Watcher's Marginalia:</strong> Greighton, you are simply a fool. Before you is what men since time immemorial have wanted—someone that would go to war for them—and yet before you is a woman who would destroy everything for you. I am disappointed in your social acumen, Greighton. But Ranessa? I grow more impressed by her with every day.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p>She watched him.</p>
+
+  <p>The look of confusion on his face was simply endearing.</p>
+
+  <p>She rose to her feet as the finality of the Sward collapsed into itself. The beauty that had reigned supreme was replaced by the harsher beauty of reality.</p>
+
+  <p>The woods, though momentarily free of danger, held a dullness of color and life. It was not muted by design, but because the place they had just left had been something divine. By comparison, all else seemed lesser.</p>
+
+  <p>"All of it…" he mouthed soundlessly as his intense eyes stared back at her—his uncertainty still endearing, and also the foothold she needed to draw more from him.</p>
+
+  <p>"Silly boy," she scoffed in that rough tone of hers. "We have much to do. Like finding where Tha—"</p>
+
+  <p>"Thabius and Sune are?" Again, there he was, finishing her sentences and questions. "I know where they're going, and we will meet them outside the Overgrown Grotto. I'm not worried," he said, as casually as if discussing a balmy day, as if this were all expected.</p>
+
+  <p>"It's this way," he hurriedly added, turning to walk in a westerly direction.</p>
+
+  <p>"It's this way," she mocked in his stoic tone before falling into step behind him.</p>
+
+  <p>Their first stop was a river that flowed with easy rapids, curling lazily against its banks. He said nothing, but instead motioned to where he would take watch, and that was exactly what he did.</p>
+
+  <p>The man took a position above the trail and stood guard.</p>
+
+  <p>"Presumptuous," she said, but then frowned as the scent of herself overtook the lingering soft rose-petal notes. "Or maybe not," she muttered with a growl.</p>
+
+  <p>Her clothing was left on the bank of the river, and she dove in without care, letting the cold sensation wash over her and cleanse away the last few days of travel and heavy emotion. It was, to say the least, cathartic. A needed reprieve from the drudgery of death, ambushes, life-altering events, and whatever else she had been forced to endure.</p>
+
+  <p>By the time she had left the cold embrace of the water, her malleable leathers drawn back on, she took several steps toward the path where Greighton stood.</p>
+
+  <p>"You too," she said. "I'll take watch."</p>
+
+  <p>"I don't—"</p>
+
+  <p>Her slender brows rose as her hands clenched. The sound of her knuckles cracking seemed to be the impetus Greighton needed to take action.</p>
+
+  <p>"You do. Now go," she said.</p>
+
+  <p>"But we—"</p>
+
+  <p>"Greighton!"</p>
+
+  <p>"Fine! Fine!" he shot back, and then the dawning realization hit him.</p>
+
+  <p>After her knuckles had popped? She was right—that was the impetus he needed, because he started to move toward the riverbank, though he still protested on the way down.</p>
+
+  <p>"Are you trying to be…" a pause of complete disbelief, "…silly?"</p>
+
+  <p>There was a pause, then a chuckle.</p>
+
+  <p>"How am I doing?"</p>
+
+  <p>Good, she thought. Much better than any other time.</p>
+
+  <p>"Fair," she said, refusing to give him the satisfaction of total admission that his antics were silly and entertaining.</p>
+
+  <p>The trail was quiet, and by the available tracks, even nature seemed to avoid anything to do with the surrounding forest. It was not as though it stood devoid of natural life, but rather as if there were something—a presence, or a premonition—that made inhabiting these woods disadvantageous.</p>
+
+  <p>She did not feel those worried notes of suspicion that would crawl up her spine on missions, only age—an age of something bygone that the land still respected.</p>
+
+  <p>She knelt, letting her hands touch Terra, and she felt and listened to the vibrations within the stone, dirt, and earth beneath her fingertips.</p>
+
+  <p>This area was old.</p>
+
+  <p>But… she gasped as her fingers dug in. An unchanged, unchecked, and respected old. The ground was pristine. The Song lay within the Terra, but simply lay there as part of it, not manipulated by it—and she tried.</p>
+
+  <p>The ground remained unmoving. The Terra beneath her fingers simply rested there as if nothing were changing.</p>
+
+  <p>"This place…" she heard behind her, startling her as she spun and lashed out with a half-formed bear claw slicing through the air.</p>
+
+  <p>With a grin, Greighton dodged beneath her response, dancing a few steps away from her—his face no longer a mask of placid indifference.</p>
+
+  <p>He was laughing.</p>
+
+  <p>At her.</p>
+
+  <p>"You fool! I could have killed you!"</p>
+
+  <p>He cocked a brow as if to question the veracity of her declaration, and she immediately knew he was right—but that did little to change her exasperation.</p>
+
+  <p>"As I was saying, this place…" he gazed about, "Thabius claims that the Song avoids this swath of land—for reasons unknown, but Terra, Aeris, and Ignis?" He shook his head. "They fail to work here."</p>
+
+  <p>"If I had Ignis, I'd light you on fire, damn it!" she seethed.</p>
+
+  <p>"I'd rather not," he admitted, and she could hear the morose tone beneath it.</p>
+
+  <p>"I…" she stepped closer. "I am sorry, Greighton. I wasn't thinking about what happened."</p>
+
+  <p>"Nor should you, 'Nessa," he admitted. "Do not change who you are because of what happened to me."</p>
+
+  <p>"Grey?" she fidgeted.</p>
+
+  <p>"What happened?"</p>
+
+  <p>She was grateful he asked. She wanted to know, but she was not about to press.</p>
+
+  <p>"Grevon has some weapon that neutralizes—kills—the Resonance," he said in a voice that was not here.</p>
+
+  <p>His tone was distant, far away, maybe back where the silver sphere had been thrown at him.</p>
+
+  <p>"And you…"</p>
+
+  <p>She listened as he described it in vivid detail: the way his swords had easily cut through the sphere, but then the explosion had been unlike anything he had ever felt before. Triggering it had done something that ceased the existence of his Resonance.</p>
+
+  <p>The Song had been blocked out. The thumping and thudding of the explosion had kept everything away—in front of him, even within reach, but void of reality, void of tangibility, he explained—and the only emotion it carried was the despondency of failure and loneliness.</p>
+
+  <p>"I thought," he said in a voice she could barely register, "that I'd lose it all, and then… lose you. I can handle losing it all, but losing you… but then your scream," he said.</p>
+
+  <p>"It was the last strand of hope, and I clung to it."</p>
+
+  <p>Her eyes met his, and the vulnerability in the man's gaze made her knees go weak.</p>
+
+  <p>"You were the strand that I held onto after I felt the Song instantly vanish and my Wellspring crack open."</p>
+
+  <p>She took a step closer. "Crack open?"</p>
+
+  <p>He nodded, explaining that it had felt like a bone snapping within, and his Resonance had poured out like spoiled wine, like vinegar flooding through him and poisoning everything.</p>
+
+  <p>"But your crying out told me, that darkness…"</p>
+
+  <p>"That darkness…" she took another step.</p>
+
+  <p>He backpedaled as she approached, his eyes distant, staring past her shoulders at something—a memory, perhaps—but she could not be sure. Every step she took to close the distance, he took a matching one to maintain it.</p>
+
+  <p>"It was all-consuming, but I focused on the one thing that doesn't require the Song."</p>
+
+  <p>Another step, matched by his retreating one.</p>
+
+  <p>"That is?" she took a longer stride.</p>
+
+  <p>"My heart," he admitted. "I could hear it beating. I could feel it, and it was your voice that made it speed up, 'Nessa."</p>
+
+  <p>"I see," she said, another step closer, and his answering step back continued—</p>
+
+  <p>Until he backed himself into a tree with the tense thud of shoulders against bark.</p>
+
+  <p>"And what," she began after closing the remaining distance in two more strides, "did you learn?"</p>
+
+  <p>He said nothing, his eyes darting around in what she suspected was a search for tactical escape, but she would have none of it.</p>
+
+  <p>"What did you learn?" she asked again.</p>
+
+  <p>He looked about, eyes scanning wildly, uncertainty—a type of fear—resting on his war-weathered face, but no answer came forth.</p>
+
+  <p>"Greighton," she said as her hands came to rest on his chest, grasping his black leathers as they creaked and whined within her hold. "What did you learn…"</p>
+
+  <p>Still, he said nothing.</p>
+
+  <p>She stepped closer. Now only air—not even light, it seemed—separated them, and she smiled as his eyes darted. There was no escape, and now she had him.</p>
+
+  <p>"You," her voice dropped to a husky whisper, "can walk into the Iron Widow's tent on a battlefield, but you cannot answer my question." She leaned into him. "What are you more afraid of—war, or me?"</p>
+
+  <p>"Not afraid of you," he finally said.</p>
+
+  <p>"Then what…" came the firm but gentle demand.</p>
+
+  <p>"Not being able to give you all of me. Not being able to love you with the same ferocity you love me…"</p>
+
+  <p>She would not let him finish.</p>
+
+  <p>That was not his decision. That was hers.</p>
+
+  <p>A single hand let go of his leather jerkin and rose to cup the back of his head. Gently, softly, and with potent tenderness, she closed the distance until their lips were separated by only an imperceptible breath.</p>
+
+  <p>"Greighton, the only way I will ever let you go is through valorous sacrifice," her head inclined, "or in old age. But here I am."</p>
+
+  <p>"Here you are," came the weak whisper.</p>
+
+  <p>"And I'm yours…" she said.</p>
+
+  <p>"And I…" he spun, her back now against the tree, but he held her with an embrace that would have set a Coppice on fire, yet with a tenderness she had never felt before.</p>
+
+  <p>The tug between the dominance of power and the surrender of love had overtaken Greighton Lastlight. She saw it in his eyes—the surrender.</p>
+
+  <p>"…am yours," he finished.</p>
+
+  <p>Before she could smile, his lips pressed to hers with a tenderness that held the intimate potency to bring a kingdom to its knees, and she tasted him, felt a surge of something more than need race through her like brushfire.</p>
+
+  <p>Devotion.</p>
+
+  <p>There was a raging fire within that burned with a ferocity that subdued even the mighty Ursa.</p>
+
+  <p>The fire within her burned for Greighton.</p>
+
+  <p>And Greighton alone.</p>
+
+  <p>The fire that burned from him? It brought her home—to a hearthstone of warmth and belonging.</p>
+
+  <p>Together—they burned—for each other.</p>
+
+  <p class="scene-break">✦ ✦ ✦</p>
+
+  <p class="entry-head">Watcher's Observation — Entry: 0044 — Attention Held Raptly at a Moment with No Historical Value…</p>
+
+  <p>May the Indomitable forgive me.</p>
+
+  <p>I know what happened on this land centuries ago, but right now I choose to ignore history, and let this moment stand on its own.</p>
+
+  <p>I watched. I watched the druid drive the warrior up against the tree. His eyes were panicked, scanning, looking for freedom, but she gave him no quarter.</p>
+
+  <p>Then she brought up his mother, war, and her.</p>
+
+  <p>What was he afraid of?</p>
+
+  <p>His answer held more potency, more resonance with love and truth, than anything I had seen, recorded, or witnessed.</p>
+
+  <p>He gave in to her.</p>
+
+  <p>Then he kissed her, and she kissed him.</p>
+
+  <p class="marginalia"><strong>Watcher's Marginalia:</strong> It was not the most intense kiss I had recorded. Not by far. However, it was the most genuine kiss I had ever witnessed, and I must now ask myself a question. Is love more powerful than what the Song and Resonance can produce? Because right now—I think I would be a fool to argue against it.</p>
+
+</div>
+
+<!-- Mobile tap zones -->
+<div class="tap-prev" id="tap-prev"></div>
+<div class="tap-next" id="tap-next"></div>
+
+<div class="reader">
+
+  <div class="chapter-header">
+    <p class="chapter-label">Chapter XV</p>
+    <p class="chapter-title">Finally</p>
+    <p class="chapter-sub">Resonant Echoes</p>
+  </div>
+
+  <div class="text-area" id="text-area">
+    <div id="page-content"></div>
+  </div>
+
+  <nav class="nav-bar">
+    <button class="nav-btn" id="prev-btn" onclick="prevPage()" disabled>&#8592; Prev</button>
+
+    <div class="nav-center">
+      <span class="page-indicator" id="page-indicator">Page 1</span>
+      <div class="font-controls">
+        <button class="font-btn" onclick="adjustFont(-1)" title="Smaller">A&#8331;</button>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">&#9790; Dark</button>
+        <button class="font-btn" onclick="adjustFont(1)"  title="Larger">A&#8314;</button>
+      </div>
+      <a class="toc-link" href="toc.html">&#8617; Contents</a>
+    </div>
+
+    <button class="nav-btn" id="next-btn" onclick="nextPage()">Next &#8594;</button>
+  </nav>
+
+</div>
+
+<script>
+  // ── Token guard ──
+  (function() {
+    const token = sessionStorage.getItem('re_token');
+    if (!token) {
+      window.location.href = 'https://jpcauthor.github.io/resonant-echoes/login.html';
+    }
+  })();
+
+  // ── Theme ──
+  const body     = document.body;
+  const themeBtn = document.getElementById('theme-btn');
+  const saved    = localStorage.getItem('re_theme') || 'dark';
+
+  if (saved === 'dark') { body.classList.add('dark'); themeBtn.textContent = '☀ Light'; }
+  else { themeBtn.textContent = '☽ Dark'; }
+
+  function toggleTheme() {
+    const isDark = body.classList.toggle('dark');
+    themeBtn.textContent = isDark ? '☀ Light' : '☽ Dark';
+    localStorage.setItem('re_theme', isDark ? 'dark' : 'light');
+    buildPages();
+  }
+
+  // ── Font size ──
+  let fontSize = parseFloat(localStorage.getItem('re_fontsize') || '1.15');
+  document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+
+  function adjustFont(dir) {
+    fontSize = Math.min(1.6, Math.max(0.9, fontSize + dir * 0.1));
+    localStorage.setItem('re_fontsize', fontSize);
+    document.documentElement.style.setProperty('--font-size', fontSize + 'rem');
+    buildPages();
+  }
+
+  // ── Pagination engine ──
+  let pages       = [];
+  let currentPage = 0;
+
+  function buildPages() {
+    const pool    = document.getElementById('para-pool');
+    const area    = document.getElementById('text-area');
+    const content = document.getElementById('page-content');
+    const paras   = Array.from(pool.children);
+    const areaH   = area.clientHeight;
+
+    pages = [];
+    let currentGroup = [];
+
+    const testDiv = document.createElement('div');
+    testDiv.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      visibility: hidden;
+      pointer-events: none;
+      width: ${content.clientWidth}px;
+      font-size: ${fontSize}rem;
+      line-height: 1.85;
+      font-family: 'EB Garamond', Georgia, serif;
+      padding: 0;
+      margin: 0;
+    `;
+    area.appendChild(testDiv);
+
+    const threshold = areaH * 0.82;
+
+    for (const para of paras) {
+      currentGroup.push(para);
+      testDiv.innerHTML = currentGroup.map(p => p.outerHTML).join('');
+
+      if (testDiv.offsetHeight > threshold && currentGroup.length > 1) {
+        currentGroup.pop();
+        pages.push([...currentGroup]);
+        currentGroup = [para];
+        testDiv.innerHTML = para.outerHTML;
+      }
+    }
+
+    if (currentGroup.length) pages.push([...currentGroup]);
+    area.removeChild(testDiv);
+
+    if (currentPage >= pages.length) currentPage = pages.length - 1;
+    renderPage();
+  }
+
+  function renderPage() {
+    const content = document.getElementById('page-content');
+    content.style.animation = 'none';
+    content.offsetHeight;
+    content.style.animation = '';
+    content.innerHTML = pages[currentPage]
+      ? pages[currentPage].map(p => p.outerHTML).join('')
+      : '';
+
+    document.getElementById('page-indicator').textContent =
+      `Page ${currentPage + 1} of ${pages.length}`;
+    document.getElementById('prev-btn').disabled = currentPage === 0;
+    document.getElementById('next-btn').disabled = currentPage === pages.length - 1;
+  }
+
+  function nextPage() {
+    if (currentPage < pages.length - 1) { currentPage++; renderPage(); }
+  }
+
+  function prevPage() {
+    if (currentPage > 0) { currentPage--; renderPage(); }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextPage();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevPage();
+  });
+
+  document.getElementById('tap-next').addEventListener('click', nextPage);
+  document.getElementById('tap-prev').addEventListener('click', prevPage);
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(buildPages, 200);
+  });
+
+  window.addEventListener('load', buildPages);
+</script>
+</body>
+</html>
